@@ -112,7 +112,7 @@ class GasStation:
 					else:
 						h = 0
 						data.append(day)
-						oneDay = [];
+						oneDay = []
 						d = d+1
 				prize = int(row[1])
 				defaultRow = row
@@ -130,7 +130,7 @@ class GasStation:
 		for station in self.prizingTable:
 			if station[0] < 10:
 				print("ID:", station[0], station[1], "\tN:", station[2], "\tE:", station[3]) 
-		
+
 class Strategy:
 	"""
 	calculates the optimal fueling strategy for path with known prizes
@@ -150,60 +150,148 @@ class Route:
 	
 	def __init__(self, file):
 		# inputs file instantly
+		print("input route")
+		#route is a tuple of capacity and the list of tuples of arrival time, id, prize and amount of a certain gas station
+		self.capacity = 0
+		self.route = []
 		self.read(file)
 	
 	def read(self, file):
 		""" TO DO:
 		- input file
 		"""
-	
+		self.capacity = 0
+		self.route = []
+		routelist = []
+
+		with open(file) as routefile:
+			first_line = True
+			for line in routefile:
+				if first_line:
+					self.capacity = int(line)
+					first_line = False
+				else:
+					linelist = line.split(";")
+					#(date, id, prize, amount)
+					routelist.append((parseDate(linelist[0]),int(linelist[1]),0,0))
+
+		self.route = routelist[:]
+		return (self.capacity, self.route)
+
+
 	def appendPrize(self, listOfPrizes):
 		""" TO DO:
 		- add prize to each gas station
 		"""
+
+		if len(listOfPrizes) != len(self.route):
+			print("Error in appendPrize method")
+
+		counter = 0
+
+		while counter < len(listOfPrizes) and counter < len(self.route):
+			templist = list(self.route[counter])
+			templist[2] = listOfPrizes[counter]
+			self.route[counter] = tuple(templist)
+
+			counter += 1
 		
-	def appendAmount(self, ListOfAmounts):
+	def appendAmount(self, listOfAmounts):
 		""" TO DO:
-		- add amount of fuell to each gas station
+		- add amount of fuel to each gas station
 		"""
+
+		if len(listOfAmounts) != len(self.route):
+			print("Error in appendAmount method")
+
+		counter = 0
+
+		while counter < len(listOfAmounts) and counter < len(self.route):
+			templist = list(self.route[counter])
+			templist[3] = listOfAmounts[counter]
+			self.route[counter] = tuple(templist)
+
+			counter += 1
 		
-	def getCapaity(self):
+	def getCapacity(self):
 		return self.capacity
 	
-	def write(self):
+	def write(self, file):
 		""" TO DO:
 		- write data to file
 		"""
-	
-		
+
+		readlines = []
+		with open(file, "r") as f:
+			first_line = True
+			for line in file:
+				if first_line:
+					first_line = False
+				else:
+					readlines.append(line)
+
+		with open(file, "w") as f:
+			counter = 0
+			for line in readlines:
+				f.write(line + ";" + str(self.route[counter][2]) + ";" + str(self.route[counter][3]))
+				counter += 1
+
 class PrizingForecast:
 	"""
 	handles files with prize requests
 	"""
-	
-	
+
+	def __init__(self, file):
+		#contains a list of tuples consisting of endDate, forecastDate and the gas station id
+		self.forecastParameter = []
+		self.read(file)
+
 	def read(self, file):
 		""" TO DO:
 		- import data from file--> store in forecastParameters
 		"""
+
+		with open(file, "r") as f:
+			self.forecastParameter = []
+			for line in f:
+				#(endDate, forecastDate, id, prize)
+				lineValues = tuple(line.split(";"))
+				self.forecastParameter.append((parseDate(lineValues[0]), parseDate(lineValues[1]), int(lineValues[2]), 0))
 		
 	def appendPrize(self, listOfPrizes):
 		""" TO DO:
 		- add prizes to each request
 		"""
+
+		counter = 0
+
+		while counter < len(listOfPrizes) and counter < len(self.forecastParameter):
+			templist = list(self.forecastParameter[counter])
+			templist[3] = listOfPrizes[counter]
+			self.forecastParameter[counter] = tuple(templist)
+
+			counter += 1
 		
 	def getForecastParams(self):
-		return self.forecastParameters
+		return self.forecastParameter
 	
-	def write(self):
+	def write(self, file):
 		""" TO DO:
 		write data to file
 		"""
-	
-		
-		
-		
-		
+
+		readlines = []
+		with open(file, "r") as f:
+			for line in file:
+				readlines.append(line)
+
+		with open(file, "w") as f:
+			counter = 0
+			for line in readlines:
+				f.write(line + ";" + str(self.forecastParameter[counter][3]))
+				counter += 1
+
+
 class Model:
 	"""
 	makes predictions for the prize of gas
