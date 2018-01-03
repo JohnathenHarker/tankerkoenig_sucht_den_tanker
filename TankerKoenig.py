@@ -55,12 +55,7 @@ class GasStation:
 	
 	def __init__(self):
 		
-		missingData = [5,7,33, 249, 291, 344, 345, 378, 386, 461, 536, 553, 554, 584, 591, 642, 643, 654]
-		print("input gas stations")
-		""" TO DO: 
-		- input IDs and position of gas stations
-		- input historic dataend="\r"
-		"""
+		#missingData = [5,7,33, 249, 291, 344, 345, 378, 386, 461, 536, 553, 554, 584, 591, 642, 643, 654]
 		
 		
 		self.prizingTable = []
@@ -87,6 +82,8 @@ class GasStation:
 		""" TO DO:
 		- find ID --> return position (and historic prizing data?)
 		"""
+		if ID == self.prizingTable[ID-1][0]:
+			return self.prizingTable[ID-1]
 	
 	def read(self, endDay, ID):
 		
@@ -353,7 +350,7 @@ class Supervisor:
 		- call right function at the right time
 		- control user
 		"""
-		print(self.gasStations.prizingTable[0])
+
 		
 		
 t1 = time.clock()		
@@ -363,5 +360,5 @@ S.handleHandle()
 
 t2 = time.clock()
 
-dt = t1-t2
+dt = t2-t1
 print("Zeit:", dt)
