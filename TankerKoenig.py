@@ -1,6 +1,7 @@
 import csv 
 import math as M
 import time
+import os.path
 
 def parseDate(date):
 	# parses date (day and time) to day, hour
@@ -58,7 +59,7 @@ class GasStation:
 		print("input gas stations")
 		""" TO DO: 
 		- input IDs and position of gas stations
-		- input historic data
+		- input historic dataend="\r"
 		"""
 		
 		
@@ -69,17 +70,14 @@ class GasStation:
 			readCSV = csv.reader(csvfile, delimiter=';')
 			id = 1
 			for row in readCSV:
-				print("read gas station", id)
+				print("read gas station", id, end="\r")
 				if id != int(row[0]):
 					print("ERROR: fehlerhafte Tankstellenliste")
 				marke = row[2]
 				nord = float(row[7])
 				sued = float(row[8])
-				
-				# Bedingung muss DRINGEND noch angepasst werden
-				if id %600+1 not in missingData:
-					self.prizingTable.append((id, marke, nord, sued, self.read(1000, id%600+1)))
-				#self.prizingTable.append((id, marke, nord, sued, self.read(600, id)))
+								
+				self.prizingTable.append((id, marke, nord, sued, self.read(10, id)))
 				id = id+1
 		# read historic data
 
@@ -99,28 +97,36 @@ class GasStation:
 		d = 0
 		h = 0
 		prize = 0
-		with open('geg. Dateien/Eingabedaten/Benzinpreise/'+str(ID)+'.csv') as csvfile:
-			readCSV = csv.reader(csvfile, delimiter=';')
-			row = next(readCSV)
-			day, hour = parseDate(row[0])
-			while d < endDay:
+		path = 'geg. Dateien/Eingabedaten/Benzinpreise/'+str(ID)+'.csv'
+		
+		# check wether file exists
+		if os.path.isfile(path):
+			with open(path) as csvfile:
+				readCSV = csv.reader(csvfile, delimiter=';')
+				row = next(readCSV)
 				
-				while day > d or (day == d and hour > h):
-					oneDay.append(prize)
-					if h < 23:
-						h = h+1
+				# first date in file
+				day, hour = parseDate(row[0])
+				
+				while d < endDay:
+					while day > d or (day == d and hour > h):
+						oneDay.append(prize)
+						if h < 23:
+							h = h+1
+						else:
+							# day is over --> append data
+							h = 0
+							data.append(oneDay)
+							oneDay = []
+							d = d+1
+					prize = int(row[1])
+					defaultRow = row
+					row = next(readCSV, defaultRow)
+					if row != defaultRow:
+						day, hour = parseDate(row[0])
 					else:
-						h = 0
-						data.append(day)
-						oneDay = []
-						d = d+1
-				prize = int(row[1])
-				defaultRow = row
-				row = next(readCSV, defaultRow)
-				if row != defaultRow:
-					day, hour = parseDate(row[0])
-				else:
-					day, hour = endDay+1, 23
+						# no more new data in file --> use last data
+						day, hour = endDay+1, 23
 		return data
 				
 		
@@ -347,8 +353,7 @@ class Supervisor:
 		- call right function at the right time
 		- control user
 		"""
-		input('hi')
-
+		print(self.gasStations.prizingTable[0])
 		
 		
 t1 = time.clock()		
