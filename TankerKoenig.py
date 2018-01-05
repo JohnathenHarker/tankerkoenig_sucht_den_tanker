@@ -1,7 +1,17 @@
+import os.path
 import csv 
 import math as M
+import numpy as np
+from neupy import algorithms, environment
 import time
-import os.path
+import random
+
+
+
+
+NUMBER_OF_EPOCHS = 100
+random.seed(42)
+
 
 def parseDate(date):
 	# parses date (day and time) to day, hour
@@ -52,16 +62,14 @@ class GasStation:
 	represents set of gas stations with ID, position, prizes
 	"""
 	
-	
 	def __init__(self):
 		
 		#missingData = [5,7,33, 249, 291, 344, 345, 378, 386, 461, 536, 553, 554, 584, 591, 642, 643, 654]
 		
-		
 		self.prizingTable = []
-		
+		t1 = time.clock()	
 		# read table of gas stations
-		with open('geg. Dateien/Eingabedaten/Tankstellen.csv') as csvfile:
+		with open('geg. Dateien/Eingabedaten/Tankstellen_short.csv') as csvfile:
 			readCSV = csv.reader(csvfile, delimiter=';')
 			id = 1
 			for row in readCSV:
@@ -72,11 +80,17 @@ class GasStation:
 				nord = float(row[7])
 				sued = float(row[8])
 								
-				self.prizingTable.append((id, marke, nord, sued, self.read(10, id)))
+				self.prizingTable.append((id, marke, nord, sued, self.read(1000, id)))
 				id = id+1
 		# read historic data
 
-		print ("completed")
+		t2 = time.clock()
+		dt = t2-t1
+		print("")
+		print ("reading gas stations completed in", dt, "seconds")
+	
+	def noData(self, ID):
+		return self.findID(ID)[4] == []
 	
 	def findID(self, ID):
 		""" TO DO:
@@ -128,11 +142,31 @@ class GasStation:
 				
 		
 		
+		
 	def print(self):
 		# prints all gas stations with positions
 		for station in self.prizingTable:
 			if station[0] < 10:
 				print("ID:", station[0], station[1], "\tN:", station[2], "\tE:", station[3]) 
+				
+	def randomData(self, ID, date):
+		# returns random data sample of 8 days
+		
+		if self.findID(ID)[4] == []:
+			print ("ERROR: no data found for gas station", ID)
+		else:
+			day = int(random.random() * (date - 8))
+			i = 0
+			while self.findID(ID)[4][day][0] == 0 and i < 20:
+				# we do not want to use data with 0 in it, maybe we are forced to do so
+				day = int(random.random() * (date - 8))
+				i = i+1
+			data = []
+			return self.findID(ID)[4][day:day+8]
+	
+	def nextID(self, ID):
+		return ID % len(self.prizingTable) +1
+		
 
 class Strategy:
 	"""
@@ -300,13 +334,49 @@ class Model:
 	makes predictions for the prize of gas
 	"""
 	
+	def __init__(self):
+		HALF_LIFE = 20
+		self.sofm = algorithms.SOFM(
+			n_inputs=24*8,			# 8 days of data
+			features_grid=(10,10), 	# 100 categories
+			
+			#distance = euclid,
+			shuffle_data = True,
+			learning_radius=5,
+			reduce_radius_after = int(NUMBER_OF_EPOCHS / 6),
+			reduce_step_after = 20,
+			reduce_std_after = 20,
+			#weight = sample_from_data,	# start with random weights from data
+			
+			step=0.1,
+			
+			show_epoch = '10 times',
+			verbose = True,
+		)
 	
-	def train(self, data):
-		""" TO DO:
-		train the SOFM with teh given data
+	
+	def train(self, gasStations, date, datasize):
+		""" 
+		train the SOFM with the given data
 		"""
+		#data_array = np.random.rand(datasize, 24*8)
+		data_array = np.zeros((datasize, 24*8))
 		
-	def forecast(self, date):
+		i = 0
+		ID = 1
+		while i < datasize:
+			while gasStations.noData(ID):
+				# find gas station with data
+				ID = gasStations.nextID(ID)
+			data = gasStations.randomData(ID, date)
+			flattened_data = [y for x in data for y in x]
+			data_array[i] = flattened_data[:]
+			i = i + 1
+			ID = gasStations.nextID(ID)
+			
+		self.sofm.train(data_array, epochs = NUMBER_OF_EPOCHS)
+		
+	def forecast(self, history,date):
 		""" TO DO:
 		predict prize
 		"""
@@ -350,15 +420,14 @@ class Supervisor:
 		- call right function at the right time
 		- control user
 		"""
+		M = Model()
+		M.train(self.gasStations, 900, 1000)
 
 		
 		
-t1 = time.clock()		
-		
+	
+	
+#M = Model()
+#M.train([])
 S = Supervisor()
 S.handleHandle()
-
-t2 = time.clock()
-
-dt = t2-t1
-print("Zeit:", dt)
