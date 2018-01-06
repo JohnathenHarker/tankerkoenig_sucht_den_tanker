@@ -69,8 +69,8 @@ class GasStation:
 		self.prizingTable = []
 		t1 = time.clock()	
 		# read table of gas stations
-		#with open('geg. Dateien/Eingabedaten/Tankstellen_short.csv') as csvfile:
-		with open('geg. Dateien/Eingabedaten/Tankstellen.csv') as csvfile:
+		with open('geg. Dateien/Eingabedaten/Tankstellen_short.csv') as csvfile:
+		#with open('geg. Dateien/Eingabedaten/Tankstellen.csv') as csvfile:
 			readCSV = csv.reader(csvfile, delimiter=';')
 			id = 1
 			for row in readCSV:
@@ -401,7 +401,13 @@ class Model:
 			))
 			i = i + 1
 		
-		self.lookup = {0: -1}
+		# find SOFM for ID
+		self.lookupID = {0: -1}
+		
+		# find all IDs for SOFM
+		self.lookupSOFMS = []
+		for i in range(0, 100):
+			self.lookupSOFMS.append([])
 		
 	
 	def train(self, gasStations, date, datasize):
@@ -413,8 +419,11 @@ class Model:
 
 		self.sofm.train(data_array, epochs = NUMBER_OF_EPOCHS)
 		"""
+		self.trainRough(gasStations, date)
+		self.trainFine(gasStations, date, datasize)
 		
 		
+	def trainRough(self, gasStations, date):	
 		dimension = len(gasStations.getDailyData(1, date))
 		self.rough = algorithms.SOFM(
 			n_inputs = dimension,		# max 365 days of data
@@ -438,7 +447,7 @@ class Model:
 			while gasStations.noData(ID):
 				# find gas station with data
 				ID = gasStations.nextID(ID)
-			data = gasStations.getDailyData(ID, date-10)
+			data = gasStations.getDailyData(ID, date)
 			data_array[i] = data[:]
 			i = i + 1
 			ID = gasStations.nextID(ID)
@@ -449,29 +458,47 @@ class Model:
 		ID = 1
 		i = 0
 		
-		#nur fuer testzwecke:
-		count = np.zeros(100)
-		
+		# assign gas stations to category
 		while i < gasStations.getCount():
 			while gasStations.noData(ID):
 				# find gas station with data
 				ID = gasStations.nextID(ID)
 			data = gasStations.getDailyData(ID, date)
 			y = np.nonzero(self.rough.predict(data)[0] == 1)[0][0]
-			count[y] = count[y]+1
-			lookupID = {ID:y}
-			self.lookup.update(lookupID)
+			self.lookupSOFMS[y].append(ID)
+			lookup = {ID:y}
+			self.lookupID.update(lookup)
 			i = i + 1
 			ID = gasStations.nextID(ID)
 		
-		print (count)
+		#for i in range(0,100):
+		#	print(len(self.lookupSOFMS[i]))
+			
 		
 		
+	
+	def trainFine(self, gasStations, date, datasize):
+		print("train SOMFS")
+		for i in range (0, 100):
+			if len(self.lookupSOFMS[i]) != 0:
+				# only train SOFMS with associated gas stations
+				self.trainSOFM(i, gasStations, date, datasize)
 		
 		
-	def findID(self, ID):
-		return 
+	def trainSOFM(self, sofmID, gasStations, date, datasize):
+		print("train SOFM", sofmID, end="\r")
+		data_array = np.zeros((datasize, 24*8))
+		j = 0
+		i = 0
+		while i < datasize:
+			ID = self.lookupSOFMS[sofmID][j]
+			j = (j+1)%len(self.lookupSOFMS[sofmID])
+			data = gasStations.randomData(ID, date)
+			flattened_data = [y for x in data for y in x]
+			data_array[i]= flattened_data[:]
+			i = i+1
 		
+		self.sofms[sofmID].train(data_array, epochs = NUMBER_OF_EPOCHS)	
 		
 	def forecast(self, history,date):
 		""" TO DO:
@@ -518,7 +545,7 @@ class Supervisor:
 		- control user
 		"""
 		M = Model()
-		M.train(self.gasStations, 400, 1000)
+		M.train(self.gasStations, 400, 100)
 
 		
 		
