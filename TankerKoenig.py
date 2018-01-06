@@ -11,7 +11,7 @@ import random
 
 
 NUMBER_OF_EPOCHS = 100
-NUMBER_OF_CORES = 4
+NUMBER_OF_CORES = 8
 random.seed(42)
 
 
@@ -489,7 +489,7 @@ class Model:
 	
 	def trainFineParallel(self, gasStations, date, datasize):
 		print ("train SOFMS parallel")
-		t2 = time.clock()	
+		t2 = time.time()	
 		
 		i = 0
 		P = []
@@ -506,7 +506,7 @@ class Model:
 			for j in range (0,len(P)):
 				P[j].join()
 		
-		t3 = time.clock()	
+		t3 = time.time()	
 		
 		dt = t3-t2
 		print("finished in", dt, "seconds")
