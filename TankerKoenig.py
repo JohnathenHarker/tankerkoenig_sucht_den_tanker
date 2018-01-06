@@ -69,7 +69,8 @@ class GasStation:
 		self.prizingTable = []
 		t1 = time.clock()	
 		# read table of gas stations
-		with open('geg. Dateien/Eingabedaten/Tankstellen_short.csv') as csvfile:
+		#with open('geg. Dateien/Eingabedaten/Tankstellen_short.csv') as csvfile:
+		with open('geg. Dateien/Eingabedaten/Tankstellen.csv') as csvfile:
 			readCSV = csv.reader(csvfile, delimiter=';')
 			id = 1
 			for row in readCSV:
@@ -379,34 +380,28 @@ class Model:
 		
 		# 100 sofms for each category one
 		self.sofms = []
-		sofm = []
 		i = 0
-		while i < 10:
-			j = 0
-			while j < 10:
-				sofm.append(algorithms.SOFM(
-					n_inputs=24*8,			# 8 days of data
-					features_grid=(10,10), 	# 100 categories
+		while i < 100:
+			self.sofms.append(algorithms.SOFM(
+				n_inputs=24*8,			# 8 days of data
+				features_grid=(10,10), 	# 100 categories
 
-					#distance = euclid,
-					shuffle_data = True,
-					learning_radius=5,
-					reduce_radius_after = int(NUMBER_OF_EPOCHS / 6),
-					reduce_step_after = 20,
-					reduce_std_after = 20,
-					#weight = sample_from_data,	# start with random weights from data
+				#distance = euclid,
+				shuffle_data = True,
+				learning_radius=5,
+				reduce_radius_after = int(NUMBER_OF_EPOCHS / 6),
+				reduce_step_after = 20,
+				reduce_std_after = 20,
+				#weight = sample_from_data,	# start with random weights from data
 
-					step=0.1,
+				step=0.1,
 
-					show_epoch = '10 times',
-					verbose = False,
-				))
-				j = j+1
-			self.sofms.append(sofm[:])
-			sofm = []
+				show_epoch = '10 times',
+				verbose = False,
+			))
 			i = i + 1
 		
-		self.lookup = []
+		self.lookup = {0: -1}
 		
 	
 	def train(self, gasStations, date, datasize):
@@ -415,37 +410,22 @@ class Model:
 		"""
 		
 		"""
-		data_array = np.zeros((datasize, 24*8))
-		
-		i = 0
-		ID = 1
-		while i < datasize:
-			while gasStations.noData(ID):
-				# find gas station with data
-				ID = gasStations.nextID(ID)
-			data = gasStations.randomData(ID, date)
-			flattened_data = [y for x in data for y in x]
-			data_array[i] = flattened_data[:]
-			i = i + 1
-			ID = gasStations.nextID(ID)
-			
+
 		self.sofm.train(data_array, epochs = NUMBER_OF_EPOCHS)
 		"""
 		
-		### real part ###
 		
 		dimension = len(gasStations.getDailyData(1, date))
 		self.rough = algorithms.SOFM(
 			n_inputs = dimension,		# max 365 days of data
 			features_grid=(10,10), 	# 100 categories
 			
-			#distance = euclid,
 			shuffle_data = True,
-			learning_radius = 3,
+			learning_radius = 5,
 			reduce_radius_after = 2,
-			reduce_step_after = 2,
-			reduce_std_after = 2,
-			step=0.1,
+			reduce_step_after = 1,
+			reduce_std_after = 3,
+			step=0.5,
 			
 			show_epoch = '5 times',
 			verbose = True,
@@ -458,12 +438,35 @@ class Model:
 			while gasStations.noData(ID):
 				# find gas station with data
 				ID = gasStations.nextID(ID)
-			data = gasStations.getDailyData(ID, date)
+			data = gasStations.getDailyData(ID, date-10)
 			data_array[i] = data[:]
 			i = i + 1
 			ID = gasStations.nextID(ID)
 		
+		# sort gas stations roughly
 		self.rough.train(data_array, epochs = 10)
+		
+		ID = 1
+		i = 0
+		
+		#nur fuer testzwecke:
+		count = np.zeros(100)
+		
+		while i < gasStations.getCount():
+			while gasStations.noData(ID):
+				# find gas station with data
+				ID = gasStations.nextID(ID)
+			data = gasStations.getDailyData(ID, date)
+			y = np.nonzero(self.rough.predict(data)[0] == 1)[0][0]
+			count[y] = count[y]+1
+			lookupID = {ID:y}
+			self.lookup.update(lookupID)
+			i = i + 1
+			ID = gasStations.nextID(ID)
+		
+		print (count)
+		
+		
 		
 		
 	def findID(self, ID):
