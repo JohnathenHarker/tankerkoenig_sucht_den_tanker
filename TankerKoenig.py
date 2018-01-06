@@ -65,7 +65,7 @@ class GasStation:
 	def __init__(self):
 		
 		#missingData = [5,7,33, 249, 291, 344, 345, 378, 386, 461, 536, 553, 554, 584, 591, 642, 643, 654]
-		
+		self.count = 0	# counts number of gasStations
 		self.prizingTable = []
 		t1 = time.clock()	
 		# read table of gas stations
@@ -80,10 +80,12 @@ class GasStation:
 				nord = float(row[7])
 				sued = float(row[8])
 								
-				self.prizingTable.append((id, marke, nord, sued, self.read(1000, id)))
+				self.prizingTable.append((id, marke, nord, sued, self.read(500, id)))
 				id = id+1
 		# read historic data
 
+		self.fillMissingData()
+		
 		t2 = time.clock()
 		dt = t2-t1
 		print("")
@@ -98,6 +100,10 @@ class GasStation:
 		"""
 		if ID == self.prizingTable[ID-1][0]:
 			return self.prizingTable[ID-1]
+		
+	def setID(self, ID, data):
+		if ID == self.prizingTable[ID-1][0]:
+			self.prizingTable[ID-1] = data[:]
 	
 	def read(self, endDay, ID):
 		
@@ -112,6 +118,7 @@ class GasStation:
 		
 		# check wether file exists
 		if os.path.isfile(path):
+			self.count = self.count +1
 			with open(path) as csvfile:
 				readCSV = csv.reader(csvfile, delimiter=';')
 				row = next(readCSV)
@@ -143,11 +150,13 @@ class GasStation:
 		
 		
 		
+		
 	def print(self):
 		# prints all gas stations with positions
 		for station in self.prizingTable:
 			if station[0] < 10:
 				print("ID:", station[0], station[1], "\tN:", station[2], "\tE:", station[3]) 
+				
 				
 	def randomData(self, ID, date):
 		# returns random data sample of 8 days
@@ -164,9 +173,39 @@ class GasStation:
 			data = []
 			return self.findID(ID)[4][day:day+8]
 	
+	def fillMissingData(self):
+		# fills in data for stations without data
+		ID = 2
+		while ID != 1:
+			if self.findID(ID)[4] == []:
+				# no data file for gas station with id = ID
+				station = self.nextID(ID)
+				while self.findID(station)[4] == []:
+					station = self.nextID(station)
+				self.setID(ID, (self.findID(ID)[0], self.findID(ID)[1], self.findID(ID)[2], self.findID(ID)[3],  self.findID(station)[4][:]))
+				self.count = self.count + 1
+			
+			ID = self.nextID(ID)
+		
+	
 	def nextID(self, ID):
 		return ID % len(self.prizingTable) +1
-		
+	
+	def getDailyData(self, ID, date):
+		# returns (max) the last year of data, one sample per day
+		if self.findID(ID)[4] == []:
+			print ("ERROR: no data found for gas station", ID)
+		else:
+			day = max([date-364, 0])
+			data = []
+			while day <= date:
+				#print(day, date, len(self.findID(ID)[4]))
+				data.append(self.findID(ID)[4][day][0])
+				day = day +1
+			return data
+	
+	def getCount(self):
+		return self.count
 
 class Strategy:
 	"""
@@ -334,32 +373,48 @@ class Model:
 	makes predictions for the prize of gas
 	"""
 	
-	def __init__(self):
+	def __init__(self):	
+		
 		HALF_LIFE = 20
-		self.sofm = algorithms.SOFM(
-			n_inputs=24*8,			# 8 days of data
-			features_grid=(10,10), 	# 100 categories
-			
-			#distance = euclid,
-			shuffle_data = True,
-			learning_radius=5,
-			reduce_radius_after = int(NUMBER_OF_EPOCHS / 6),
-			reduce_step_after = 20,
-			reduce_std_after = 20,
-			#weight = sample_from_data,	# start with random weights from data
-			
-			step=0.1,
-			
-			show_epoch = '10 times',
-			verbose = True,
-		)
-	
+		
+		# 100 sofms for each category one
+		self.sofms = []
+		sofm = []
+		i = 0
+		while i < 10:
+			j = 0
+			while j < 10:
+				sofm.append(algorithms.SOFM(
+					n_inputs=24*8,			# 8 days of data
+					features_grid=(10,10), 	# 100 categories
+
+					#distance = euclid,
+					shuffle_data = True,
+					learning_radius=5,
+					reduce_radius_after = int(NUMBER_OF_EPOCHS / 6),
+					reduce_step_after = 20,
+					reduce_std_after = 20,
+					#weight = sample_from_data,	# start with random weights from data
+
+					step=0.1,
+
+					show_epoch = '10 times',
+					verbose = False,
+				))
+				j = j+1
+			self.sofms.append(sofm[:])
+			sofm = []
+			i = i + 1
+		
+		self.lookup = []
+		
 	
 	def train(self, gasStations, date, datasize):
 		""" 
 		train the SOFM with the given data
 		"""
-		#data_array = np.random.rand(datasize, 24*8)
+		
+		"""
 		data_array = np.zeros((datasize, 24*8))
 		
 		i = 0
@@ -375,6 +430,45 @@ class Model:
 			ID = gasStations.nextID(ID)
 			
 		self.sofm.train(data_array, epochs = NUMBER_OF_EPOCHS)
+		"""
+		
+		### real part ###
+		
+		dimension = len(gasStations.getDailyData(1, date))
+		self.rough = algorithms.SOFM(
+			n_inputs = dimension,		# max 365 days of data
+			features_grid=(10,10), 	# 100 categories
+			
+			#distance = euclid,
+			shuffle_data = True,
+			learning_radius = 3,
+			reduce_radius_after = 2,
+			reduce_step_after = 2,
+			reduce_std_after = 2,
+			step=0.1,
+			
+			show_epoch = '5 times',
+			verbose = True,
+		)
+		
+		data_array = np.zeros((gasStations.getCount(), dimension))
+		ID = 1
+		i = 0
+		while i < gasStations.getCount():
+			while gasStations.noData(ID):
+				# find gas station with data
+				ID = gasStations.nextID(ID)
+			data = gasStations.getDailyData(ID, date)
+			data_array[i] = data[:]
+			i = i + 1
+			ID = gasStations.nextID(ID)
+		
+		self.rough.train(data_array, epochs = 10)
+		
+		
+	def findID(self, ID):
+		return 
+		
 		
 	def forecast(self, history,date):
 		""" TO DO:
@@ -421,7 +515,7 @@ class Supervisor:
 		- control user
 		"""
 		M = Model()
-		M.train(self.gasStations, 900, 1000)
+		M.train(self.gasStations, 400, 1000)
 
 		
 		
