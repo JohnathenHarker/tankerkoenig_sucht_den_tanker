@@ -3,7 +3,7 @@ import csv
 from multiprocessing import Process
 import math as M
 import numpy as np
-from neupy import algorithms, environment
+from neupy import algorithms, environment, init
 import time
 import random
 
@@ -380,23 +380,25 @@ class Model:
 		
 		HALF_LIFE = 20
 		
-		# 100 sofms for each category one
+		# 16 sofms for each category one
 		self.sofms = []
 		i = 0
-		while i < 100:
+		while i < 16:
 			self.sofms.append(algorithms.SOFM(
 				n_inputs=24*8,			# 8 days of data
 				features_grid=(10,10), 	# 100 categories
 
 				#distance = euclid,
 				shuffle_data = True,
-				learning_radius=5,
+				learning_radius=3,
 				reduce_radius_after = int(NUMBER_OF_EPOCHS / 6),
-				reduce_step_after = 20,
+				reduce_step_after = 10,
 				reduce_std_after = 20,
-				#weight = sample_from_data,	# start with random weights from data
-
-				step=0.1,
+		
+				#weight = 'sample_from_data',	# start with random weights from data
+				weight = init.Normal(mean = 0, std = 10),
+				
+				step=0.8,
 
 				show_epoch = '10 times',
 				verbose = False,
@@ -408,7 +410,7 @@ class Model:
 		
 		# find all IDs for SOFM
 		self.lookupSOFMS = []
-		for i in range(0, 100):
+		for i in range(0, 16):
 			self.lookupSOFMS.append([])
 		
 	
@@ -417,10 +419,7 @@ class Model:
 		train the SOFM with the given data
 		"""
 		
-		"""
-
-		self.sofm.train(data_array, epochs = NUMBER_OF_EPOCHS)
-		"""
+		self.trainingDate = date
 		self.trainRough(gasStations, date)
 		self.trainFineParallel(gasStations, date, datasize)
 		
@@ -429,14 +428,15 @@ class Model:
 		dimension = len(gasStations.getDailyData(1, date))
 		self.rough = algorithms.SOFM(
 			n_inputs = dimension,		# max 365 days of data
-			features_grid=(10,10), 	# 100 categories
+			features_grid=(4,4), 	# 100 categories
 			
 			shuffle_data = True,
 			learning_radius = 5,
 			reduce_radius_after = 2,
-			reduce_step_after = 1,
+			reduce_step_after = 2,
 			reduce_std_after = 3,
 			step=0.5,
+			weight = 'sample_from_data',	# start with random weights from data
 			
 			show_epoch = '5 times',
 			verbose = True,
@@ -455,7 +455,8 @@ class Model:
 			ID = gasStations.nextID(ID)
 		
 		# sort gas stations roughly
-		self.rough.train(data_array, epochs = 10)
+		self.rough.init_weights(data_array)
+		self.rough.train(data_array, epochs = 20)
 		
 		ID = 1
 		i = 0
@@ -481,7 +482,7 @@ class Model:
 	
 	def trainFine(self, gasStations, date, datasize):
 		print("train SOMFS")
-		for i in range (0, 100):
+		for i in range (0, 16):
 			if len(self.lookupSOFMS[i]) != 0:
 				# only train SOFMS with associated gas stations
 				self.trainSOFM(i, gasStations, date, datasize)
@@ -493,10 +494,10 @@ class Model:
 		
 		i = 0
 		P = []
-		while i < 100:
+		while i < 16:
 			P = []
 			a = 0
-			while a < NUMBER_OF_CORES and i < 100:
+			while a < NUMBER_OF_CORES and i < 16:
 				if len(self.lookupSOFMS[i]) != 0:
 					P.append(Process(target=self.trainSOFM, args=(i, gasStations, date, datasize,)))
 					a = a + 1
@@ -521,16 +522,54 @@ class Model:
 				ID = self.lookupSOFMS[sofmID][j]
 				j = (j+1)%len(self.lookupSOFMS[sofmID])
 				data = gasStations.randomData(ID, date)
-				flattened_data = [y for x in data for y in x]
+				flattened_data = [y - data[0][0] for x in data for y in x]
 				data_array[i]= flattened_data[:]
 				i = i+1
-
+			
 			self.sofms[sofmID].train(data_array, epochs = NUMBER_OF_EPOCHS)	
 		
-	def forecast(self, history,date):
+	def forecast(self, ID, date, hour, gasStations):
 		""" TO DO:
 		predict prize
 		"""
+		sofmID = self.lookupID[ID]
+		history = gasStations.findID(ID)[4][self.trainingDate-6 : self.trainingDate+1]
+		history = [y for x in history for y in x]
+		history = np.asarray(history)
+		weights = self.sofms[sofmID].weight
+	
+		d = date-self.trainingDate
+		if (d > 0):
+			for i in range(0, d+1):
+				prediction = self.simpleForecast(weights, history)
+				history = np.append(history[24:], prediction)
+			return prediction[hour]
+		else:
+			print("NOTE: requestet prize is not in the future")
+			return gasStations.findID(ID)[4][date][hour]
+		
+		
+	def simpleForecast(self, weights, history):
+		# returns one day of forecasting
+		a = history
+		start = a[0]
+		a = a-start
+		dist = np.linalg.norm(a - weights[:168, 0])
+		best_matching = 0
+		for i in range(0, weights.shape[1]):
+			# visit all columns
+			d = np.linalg.norm(a - weights[:168, i])
+			if d < dist:
+				dist = d
+				best_maching = i
+		#return day plus first value
+		#print(best_matching)
+		#print (weights[:, best_matching])
+		return weights[168:193,best_matching] + start
+			
+			
+		
+		
 		
 class Supervisor:
 	"""
@@ -572,13 +611,19 @@ class Supervisor:
 		- control user
 		"""
 		M = Model()
-		M.train(self.gasStations, 400, 100)
+		M.train(self.gasStations, 400, 500)
+		for i in [1,2,3,4,5,10,15, 20, 25, 30]:
+			print(M.forecast(6, 400+i, 4, self.gasStations))
+			print(self.gasStations.findID(6)[4][400+i][4])
 
 		
 		
-	
+t1 = time.time()
 	
 #M = Model()
 #M.train([])
 S = Supervisor()
 S.handleHandle()
+
+t2 = time.time()
+print("executed in", t2-t1, "seconds")
