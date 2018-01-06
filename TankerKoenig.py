@@ -1,5 +1,6 @@
 import os.path
 import csv 
+from multiprocessing import Process
 import math as M
 import numpy as np
 from neupy import algorithms, environment
@@ -10,6 +11,7 @@ import random
 
 
 NUMBER_OF_EPOCHS = 100
+NUMBER_OF_CORES = 4
 random.seed(42)
 
 
@@ -420,7 +422,7 @@ class Model:
 		self.sofm.train(data_array, epochs = NUMBER_OF_EPOCHS)
 		"""
 		self.trainRough(gasStations, date)
-		self.trainFine(gasStations, date, datasize)
+		self.trainFineParallel(gasStations, date, datasize)
 		
 		
 	def trainRough(self, gasStations, date):	
@@ -484,21 +486,46 @@ class Model:
 				# only train SOFMS with associated gas stations
 				self.trainSOFM(i, gasStations, date, datasize)
 		
+	
+	def trainFineParallel(self, gasStations, date, datasize):
+		print ("train SOFMS parallel")
+		t2 = time.clock()	
 		
-	def trainSOFM(self, sofmID, gasStations, date, datasize):
-		print("train SOFM", sofmID, end="\r")
-		data_array = np.zeros((datasize, 24*8))
-		j = 0
 		i = 0
-		while i < datasize:
-			ID = self.lookupSOFMS[sofmID][j]
-			j = (j+1)%len(self.lookupSOFMS[sofmID])
-			data = gasStations.randomData(ID, date)
-			flattened_data = [y for x in data for y in x]
-			data_array[i]= flattened_data[:]
-			i = i+1
+		P = []
+		while i < 100:
+			P = []
+			a = 0
+			while a < NUMBER_OF_CORES and i < 100:
+				if len(self.lookupSOFMS[i]) != 0:
+					P.append(Process(target=self.trainSOFM, args=(i, gasStations, date, datasize,)))
+					a = a + 1
+				i = i+1
+			for j in range (0,len(P)):
+				P[j].start()
+			for j in range (0,len(P)):
+				P[j].join()
 		
-		self.sofms[sofmID].train(data_array, epochs = NUMBER_OF_EPOCHS)	
+		t3 = time.clock()	
+		
+		dt = t3-t2
+		print("finished in", dt, "seconds")
+	
+	
+	def trainSOFM(self, sofmID, gasStations, date, datasize):
+		if len(self.lookupSOFMS[sofmID]) != 0:
+			data_array = np.zeros((datasize, 24*8))
+			j = 0
+			i = 0
+			while i < datasize:
+				ID = self.lookupSOFMS[sofmID][j]
+				j = (j+1)%len(self.lookupSOFMS[sofmID])
+				data = gasStations.randomData(ID, date)
+				flattened_data = [y for x in data for y in x]
+				data_array[i]= flattened_data[:]
+				i = i+1
+
+			self.sofms[sofmID].train(data_array, epochs = NUMBER_OF_EPOCHS)	
 		
 	def forecast(self, history,date):
 		""" TO DO:
