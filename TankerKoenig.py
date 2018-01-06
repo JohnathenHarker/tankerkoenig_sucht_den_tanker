@@ -70,9 +70,9 @@ class GasStation:
 					print("ERROR: fehlerhafte Tankstellenliste")
 				marke = row[2]
 				nord = float(row[7])
-				sued = float(row[8])
+				ost = float(row[8])
 								
-				self.prizingTable.append((id, marke, nord, sued, self.read(10, id)))
+				self.prizingTable.append((id, marke, nord, ost, self.read(10, id)))
 				id = id+1
 		# read historic data
 
@@ -84,6 +84,8 @@ class GasStation:
 		"""
 		if ID == self.prizingTable[ID-1][0]:
 			return self.prizingTable[ID-1]
+		else:
+			return
 	
 	def read(self, endDay, ID):
 		
@@ -139,10 +141,71 @@ class Strategy:
 	calculates the optimal fueling strategy for path with known prizes
 	formerly known as tFontF
 	"""
-	def calculate(route, gasStation):
+	def __init__(self):
+		print("Calculating best route")
+		self.capacity = 0
+		self.route = []
+		self.possibleRoutes = {}
+        self.gasStation = None
+
+
+	def calculate(self, route, gasStation):
 		""" TO DO:
 		- compute best strategy for fueling and return it
 		"""
+		self.capacity = route.capacity
+		self.route = route.route
+		self.gasStation = gasStation
+		nullRoute = [0] * len(self.route)
+		self.helpCalculate(0,0,0,nullRoute)
+		self.possibleRoutes = {}
+        route.appendAmount(self.possibleRoutes[min(list(self.possibleRoutes.keys()))])
+
+
+	def helpCalculate(self, currentNode, currentGas, currentCost, previousRoute):
+		def prize(position):
+			return int(self.route[position][2])
+
+		if currentNode == len(self.route)-1:
+			previousRouteCopy = previousRoute[:]
+			self.possibleRoutes[currentCost] = previousRouteCopy
+			return
+
+		for node in range(currentNode+1, len(self.route)):
+			if self.consumption(currentNode, node) <= self.capacity:
+				previousRouteCopy = previousRoute[:]
+
+				if prize(node) <= prize(currentNode) and currentGas <= self.consumption(currentNode, node):
+					previousRouteCopy[currentNode] = self.consumption(currentNode, node) - currentGas
+					self.helpCalculate(node, 0, currentCost + (self.consumption(currentNode, node)-currentGas) * prize(currentNode), previousRouteCopy)
+				elif prize(node) > prize(currentNode):
+					previousRouteCopy[currentNode] = self.capacity - currentGas
+					self.helpCalculate(node, self.capacity - self.consumption(currentNode, node), currentCost + (self.capacity - currentGas) * prize(currentNode), previousRouteCopy)
+		return
+
+	def consumption(self, currentNode, targetNode):
+		def distance(self, station1, station2):
+			def lat(stationNr):
+				return self.gasStation.findID(stationNr)[7]
+
+			def lon(stationNr):
+				return self.gasStation.findID(stationNr)[8]
+
+			return 6378.388 * M.acos(M.sin(lat(station1)) * M.sin(lat(station2)) + M.cos(lat(station1)) * M.cos(lat(station2)) * M.cos(lon(station2) - lon(station1)))
+
+		def getIDfromPosInRoute(position):
+			if position >= len(self.route):
+				print("ERROR in getID function")
+				return 0
+			return int(self.route[position][1])
+
+		if currentNode == targetNode:
+			return 0
+		else:
+			dist = distance(getIDfromPosInRoute(currentNode), getIDfromPosInRoute(currentNode+1))
+			consumptionPerKilometer = 5.6
+			consumptionToNext = 1.0 * dist / consumptionPerKilometer
+			return consumptionToNext + self.consumption(currentNode+1, targetNode)
 
 		
 class Route:
@@ -205,7 +268,7 @@ class Route:
 		"""
 
 		if len(listOfAmounts) != len(self.route):
-			print("Error in appendAmount method")
+			print("ERROR in appendAmount method")
 
 		counter = 0
 
