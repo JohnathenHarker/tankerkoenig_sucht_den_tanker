@@ -156,9 +156,9 @@ class Strategy:
 		self.capacity = route.capacity
 		self.route = route.route
 		self.gasStation = gasStation
+		self.possibleRoutes = {}
 		nullRoute = [0] * len(self.route)
 		self.helpCalculate(0,0,0,nullRoute)
-		self.possibleRoutes = {}
         route.appendAmount(self.possibleRoutes[min(list(self.possibleRoutes.keys()))])
 
 
@@ -414,7 +414,8 @@ class Supervisor:
 		- control user
 		"""
 
-		
+def main():
+
 		
 t1 = time.clock()		
 		
