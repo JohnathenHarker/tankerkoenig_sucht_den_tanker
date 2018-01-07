@@ -1,8 +1,10 @@
 import os.path
 import csv 
 from multiprocessing import Process
+import threading as td
 import math as M
 import numpy as np
+import matplotlib.pyplot as plt
 from neupy import algorithms, environment, init
 import time
 import random
@@ -103,6 +105,8 @@ class GasStation:
 		"""
 		if ID == self.prizingTable[ID-1][0]:
 			return self.prizingTable[ID-1]
+		else:
+			return self.prizingTable[self.prizingTable.index(ID)]
 
 	def setID(self, ID, data):
 		if ID == self.prizingTable[ID-1][0]:
@@ -554,10 +558,11 @@ class Model:
 
 
 	def trainRough(self, gasStations, date):
+		print("train rough")
 		dimension = len(gasStations.getDailyData(1, date))
 		self.rough = algorithms.SOFM(
 			n_inputs = dimension,		# max 365 days of data
-			features_grid=(4,4), 	# 100 categories
+			features_grid=(4,4), 		# 100 categories
 
 			shuffle_data = True,
 			learning_radius = 5,
@@ -568,7 +573,7 @@ class Model:
 			weight = 'sample_from_data',	# start with random weights from data
 
 			show_epoch = '5 times',
-			verbose = True,
+			verbose = False,
 		)
 
 		data_array = np.zeros((gasStations.getCount(), dimension))
@@ -607,8 +612,6 @@ class Model:
 		#	print(len(self.lookupSOFMS[i]))
 
 
-
-
 	def trainFine(self, gasStations, date, datasize):
 		print("train SOMFS")
 		for i in range (0, 16):
@@ -619,7 +622,7 @@ class Model:
 
 	def trainFineParallel(self, gasStations, date, datasize):
 		print ("train SOFMS parallel")
-		t2 = time.time()
+		t1 = time.time()
 
 		i = 0
 		P = []
@@ -636,14 +639,49 @@ class Model:
 			for j in range (0,len(P)):
 				P[j].join()
 
-		t3 = time.time()
-
-		dt = t3-t2
+		t2 = time.time()	
+	
+		dt = t2-t1
 		print("finished in", dt, "seconds")
 
 
 	def trainSOFM(self, sofmID, gasStations, date, datasize):
 		if len(self.lookupSOFMS[sofmID]) != 0:
+			
+			# create random start values
+			init_weights = np.zeros((100, 24*8))
+			j = 0
+			i = 0
+			while i < 100:
+				ID = self.lookupSOFMS[sofmID][j]
+				j = (j+1)%len(self.lookupSOFMS[sofmID])
+				data = gasStations.randomData(ID, date)
+				flattened_data = [y - data[6][23] for x in data for y in x]
+				init_weights[i]= flattened_data[:]
+				i = i+1
+			
+			init_weight = np.transpose(init_weights)[:]
+			
+			self.sofms[sofmID] = algorithms.SOFM(
+				n_inputs=24*8,			# 8 days of data
+				features_grid=(10,10), 	# 100 categories
+
+				#distance = euclid,
+				shuffle_data = True,
+				learning_radius=4,
+				reduce_radius_after = int(NUMBER_OF_EPOCHS / 4),
+				reduce_step_after = 10,
+				reduce_std_after = 10,
+
+				#weight = 'sample_from_data',	# start with random weights from data
+				weight = init_weight,
+
+				step=0.8,
+
+				show_epoch = '10 times',
+				verbose = False,
+			)
+			
 			data_array = np.zeros((datasize, 24*8))
 			j = 0
 			i = 0
@@ -651,11 +689,17 @@ class Model:
 				ID = self.lookupSOFMS[sofmID][j]
 				j = (j+1)%len(self.lookupSOFMS[sofmID])
 				data = gasStations.randomData(ID, date)
-				flattened_data = [y - data[0][0] for x in data for y in x]
+				flattened_data = [y - data[6][23] for x in data for y in x]
 				data_array[i]= flattened_data[:]
 				i = i+1
 
 			self.sofms[sofmID].train(data_array, epochs = NUMBER_OF_EPOCHS)
+			
+		if sofmID == 5 :
+			print("map4:", self.sofms[sofmID].weight[:192, 4])
+			print("map80:", self.sofms[sofmID].weight[:192, 80])
+			
+		return
 
 	def forecast(self, ID, date, hour, gasStations):
 		""" TO DO:
@@ -669,33 +713,71 @@ class Model:
 
 		d = date-self.trainingDate
 		if (d > 0):
-			for i in range(0, d+1):
+			for i in range(0, d):
 				prediction = self.simpleForecast(weights, history)
 				history = np.append(history[24:], prediction)
 			return prediction[hour]
 		else:
-			print("NOTE: requestet prize is not in the future")
+			#print("NOTE: requestet prize is not in the future")
 			return gasStations.findID(ID)[4][date][hour]
 
 
 	def simpleForecast(self, weights, history):
 		# returns one day of forecasting
 		a = history
-		start = a[0]
+		start = a[167]
 		a = a-start
 		dist = np.linalg.norm(a - weights[:168, 0])
+		#print("dist:", dist, 0)
 		best_matching = 0
 		for i in range(0, weights.shape[1]):
 			# visit all columns
 			d = np.linalg.norm(a - weights[:168, i])
+			#print("d:", d, dist, i)
 			if d < dist:
 				dist = d
-				best_maching = i
+				best_matching = i
 		#return day plus first value
-		#print(best_matching)
+		#print("best:",best_matching)
 		#print (weights[:, best_matching])
 		return weights[168:193,best_matching] + start
 
+	
+	def evaluate(self, gasStations):
+		data = np.zeros((30,2))
+		begin = self.trainingDate
+		rounds = 200
+		for day in range(0,30):
+			d1 = 0
+			d2 = 0
+			for i in range(0, rounds):
+				station = int(random.random()* (gasStations.count-1))+1
+				hour = int(random.random() * 23)
+				if not gasStations.noData(station):
+					a = self.forecast(station, begin+day, hour, gasStations) 	# prediction
+					b = gasStations.findID(station)[4][begin+day][hour]		# real value
+					c = gasStations.findID(station)[4][begin][0]			# start value of month
+
+					dif1 = abs(b-a)
+					dif2 = abs(c-b)
+					d1 = d1 + dif1
+					d2 = d2 + dif2
+			dif1 = d1/rounds
+			dif2 = d2/rounds
+			data[day][0] = dif1
+			data[day][1] = dif2
+			
+		plt.plot(data[:, 0:1])
+		plt.ylabel('Durchschnittliche Abweichung der Vorhersage vom richtigen Wert (0,1 ct)')
+		plt.xlabel('Tage hinter bekanntem Preis')
+		plt.show()
+		
+		plt.plot(data[:, 1:2])
+		plt.ylabel('Durchschnittliche Abweichung vom letzten bekannten Wert (0,1 ct)')
+		plt.xlabel('Tage hinter bekanntem Preis')
+		plt.show()
+		np.savetxt('evaluation.csv', data, delimiter=';')
+		print("model evaluated")
 
 
 class Supervisor:
@@ -737,11 +819,13 @@ class Supervisor:
 		- call right function at the right time
 		- control user
 		"""
-		M = Model()
-		M.train(self.gasStations, 400, 500)
-		for i in [1,2,3,4,5,10,15, 20, 25, 30]:
-			print(M.forecast(6, 400+i, 4, self.gasStations))
+		m = Model()
+		m.train(self.gasStations, 400, 500)
+		#for i in [1,2,3,4,5,10,15, 20, 25, 30]:
+		for i in [30]:
+			print(m.forecast(6, 400+i, 4, self.gasStations))
 			print(self.gasStations.findID(6)[4][400+i][4])
+		m.evaluate(self.gasStations)
 
 
 t1 = time.time()
