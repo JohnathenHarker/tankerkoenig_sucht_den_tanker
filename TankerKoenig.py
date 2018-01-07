@@ -60,155 +60,155 @@ def parseDate(date):
     return (normalized_day, hour)#, year, month, day)
 
 class GasStation:
-	"""
-	represents set of gas stations with ID, position, prizes
-	"""
-	
-	def __init__(self):
-		
-		#missingData = [5,7,33, 249, 291, 344, 345, 378, 386, 461, 536, 553, 554, 584, 591, 642, 643, 654]
-		self.count = 0	# counts number of gasStations
-		self.prizingTable = []
-		t1 = time.clock()	
-		# read table of gas stations
-		with open('geg. Dateien/Eingabedaten/Tankstellen_short.csv', encoding='utf-8') as csvfile:
-		#with open('geg. Dateien/Eingabedaten/Tankstellen.csv') as csvfile:
-			readCSV = csv.reader(csvfile, delimiter=';')
-			id = 1
-			for row in readCSV:
-				print("read gas station", id, end="\r")
-				if id != int(row[0]):
-					print("ERROR: fehlerhafte Tankstellenliste")
-				marke = row[2]
-				nord = float(row[7])
-				sued = float(row[8])
-								
-				self.prizingTable.append((id, marke, nord, sued, self.read(500, id)))
-				id = id+1
-		# read historic data
+    """
+    represents set of gas stations with ID, position, prizes
+    """
 
-		self.fillMissingData()
-		
-		t2 = time.clock()
-		dt = t2-t1
-		print("")
-		print ("reading gas stations completed in", dt, "seconds")
-	
-	def noData(self, ID):
-		return self.findID(ID)[4] == []
-	
-	def findID(self, ID):
-		""" TO DO:
-		- find ID --> return position (and historic prizing data?)
-		"""
-		if ID == self.prizingTable[ID-1][0]:
-			return self.prizingTable[ID-1]
-		
-	def setID(self, ID, data):
-		if ID == self.prizingTable[ID-1][0]:
-			self.prizingTable[ID-1] = data[:]
-	
-	def read(self, endDay, ID):
-		
-		# read historic data for given gas station till given day
-		
-		data = []
-		oneDay = []
-		d = 0
-		h = 0
-		prize = 0
-		path = 'geg. Dateien/Eingabedaten/Benzinpreise/'+str(ID)+'.csv'
-		
-		# check wether file exists
-		if os.path.isfile(path):
-			self.count = self.count +1
-			with open(path, encoding= 'utf-8') as csvfile:
-				readCSV = csv.reader(csvfile, delimiter=';')
-				row = next(readCSV)
-				
-				# first date in file
-				day, hour = parseDate(row[0])
-				
-				while d < endDay:
-					while day > d or (day == d and hour > h):
-						oneDay.append(prize)
-						if h < 23:
-							h = h+1
-						else:
-							# day is over --> append data
-							h = 0
-							data.append(oneDay)
-							oneDay = []
-							d = d+1
-					prize = int(row[1])
-					defaultRow = row
-					row = next(readCSV, defaultRow)
-					if row != defaultRow:
-						day, hour = parseDate(row[0])
-					else:
-						# no more new data in file --> use last data
-						day, hour = endDay+1, 23
-		return data
-				
-		
-		
-		
-		
-	def print(self):
-		# prints all gas stations with positions
-		for station in self.prizingTable:
-			if station[0] < 10:
-				print("ID:", station[0], station[1], "\tN:", station[2], "\tE:", station[3]) 
-				
-				
-	def randomData(self, ID, date):
-		# returns random data sample of 8 days
-		
-		if self.findID(ID)[4] == []:
-			print ("ERROR: no data found for gas station", ID)
-		else:
-			day = int(random.random() * (date - 8))
-			i = 0
-			while self.findID(ID)[4][day][0] == 0 and i < 20:
-				# we do not want to use data with 0 in it, maybe we are forced to do so
-				day = int(random.random() * (date - 8))
-				i = i+1
-			data = []
-			return self.findID(ID)[4][day:day+8]
-	
-	def fillMissingData(self):
-		# fills in data for stations without data
-		ID = 2
-		while ID != 1:
-			if self.findID(ID)[4] == []:
-				# no data file for gas station with id = ID
-				station = self.nextID(ID)
-				while self.findID(station)[4] == []:
-					station = self.nextID(station)
-				self.setID(ID, (self.findID(ID)[0], self.findID(ID)[1], self.findID(ID)[2], self.findID(ID)[3],  self.findID(station)[4][:]))
-				self.count = self.count + 1
-			
-			ID = self.nextID(ID)
-		
-	
-	def nextID(self, ID):
-		return ID % len(self.prizingTable) +1
-	
-	def getDailyData(self, ID, date):
-		# returns (max) the last year of data, one sample per day
-		if self.findID(ID)[4] == []:
-			print ("ERROR: no data found for gas station", ID)
-		else:
-			day = max([date-364, 0])
-			data = []
-			while day <= date:
-				#print(day, date, len(self.findID(ID)[4]))
-				data.append(self.findID(ID)[4][day][0])
-				day = day +1
-			return data
-	
-	def getCount(self):
-		return self.count
+    def __init__(self):
+
+        #missingData = [5,7,33, 249, 291, 344, 345, 378, 386, 461, 536, 553, 554, 584, 591, 642, 643, 654]
+        self.count = 0	# counts number of gasStations
+        self.prizingTable = []
+        t1 = time.clock()
+        # read table of gas stations
+        with open('geg. Dateien/Eingabedaten/Tankstellen_short.csv', encoding='utf-8') as csvfile:
+        #with open('geg. Dateien/Eingabedaten/Tankstellen.csv') as csvfile:
+            readCSV = csv.reader(csvfile, delimiter=';')
+            id = 1
+            for row in readCSV:
+                print("read gas station", id, end="\r")
+                if id != int(row[0]):
+                    print("ERROR: fehlerhafte Tankstellenliste")
+                marke = row[2]
+                nord = float(row[7])
+                sued = float(row[8])
+
+                self.prizingTable.append((id, marke, nord, sued, self.read(500, id)))
+                id = id+1
+        # read historic data
+
+        self.fillMissingData()
+
+        t2 = time.clock()
+        dt = t2-t1
+        print("")
+        print ("reading gas stations completed in", dt, "seconds")
+
+    def noData(self, ID):
+        return self.findID(ID)[4] == []
+
+    def findID(self, ID):
+        """ TO DO:
+        - find ID --> return position (and historic prizing data?)
+        """
+        if ID == self.prizingTable[ID-1][0]:
+            return self.prizingTable[ID-1]
+
+    def setID(self, ID, data):
+        if ID == self.prizingTable[ID-1][0]:
+            self.prizingTable[ID-1] = data[:]
+
+    def read(self, endDay, ID):
+
+        # read historic data for given gas station till given day
+
+        data = []
+        oneDay = []
+        d = 0
+        h = 0
+        prize = 0
+        path = 'geg. Dateien/Eingabedaten/Benzinpreise/'+str(ID)+'.csv'
+
+        # check wether file exists
+        if os.path.isfile(path):
+            self.count = self.count +1
+            with open(path, encoding= 'utf-8') as csvfile:
+                readCSV = csv.reader(csvfile, delimiter=';')
+                row = next(readCSV)
+
+                # first date in file
+                day, hour = parseDate(row[0])
+
+                while d < endDay:
+                    while day > d or (day == d and hour > h):
+                        oneDay.append(prize)
+                        if h < 23:
+                            h = h+1
+                        else:
+                            # day is over --> append data
+                            h = 0
+                            data.append(oneDay)
+                            oneDay = []
+                            d = d+1
+                    prize = int(row[1])
+                    defaultRow = row
+                    row = next(readCSV, defaultRow)
+                    if row != defaultRow:
+                        day, hour = parseDate(row[0])
+                    else:
+                        # no more new data in file --> use last data
+                        day, hour = endDay+1, 23
+        return data
+
+
+
+
+
+    def print(self):
+        # prints all gas stations with positions
+        for station in self.prizingTable:
+            if station[0] < 10:
+                print("ID:", station[0], station[1], "\tN:", station[2], "\tE:", station[3])
+
+
+    def randomData(self, ID, date):
+        # returns random data sample of 8 days
+
+        if self.findID(ID)[4] == []:
+            print ("ERROR: no data found for gas station", ID)
+        else:
+            day = int(random.random() * (date - 8))
+            i = 0
+            while self.findID(ID)[4][day][0] == 0 and i < 20:
+                # we do not want to use data with 0 in it, maybe we are forced to do so
+                day = int(random.random() * (date - 8))
+                i = i+1
+            data = []
+            return self.findID(ID)[4][day:day+8]
+
+    def fillMissingData(self):
+        # fills in data for stations without data
+        ID = 2
+        while ID != 1:
+            if self.findID(ID)[4] == []:
+                # no data file for gas station with id = ID
+                station = self.nextID(ID)
+                while self.findID(station)[4] == []:
+                    station = self.nextID(station)
+                self.setID(ID, (self.findID(ID)[0], self.findID(ID)[1], self.findID(ID)[2], self.findID(ID)[3],  self.findID(station)[4][:]))
+                self.count = self.count + 1
+
+            ID = self.nextID(ID)
+
+
+    def nextID(self, ID):
+        return ID % len(self.prizingTable) +1
+
+    def getDailyData(self, ID, date):
+        # returns (max) the last year of data, one sample per day
+        if self.findID(ID)[4] == []:
+            print ("ERROR: no data found for gas station", ID)
+        else:
+            day = max([date-364, 0])
+            data = []
+            while day <= date:
+                #print(day, date, len(self.findID(ID)[4]))
+                data.append(self.findID(ID)[4][day][0])
+                day = day +1
+            return data
+
+    def getCount(self):
+        return self.count
 
 class Strategy:
     """
@@ -497,251 +497,251 @@ class PrizingForecast:
 
 
 class Model:
-	"""
-	makes predictions for the prize of gas
-	"""
-	
-	def __init__(self):	
-		
-		HALF_LIFE = 20
-		
-		# 16 sofms for each category one
-		self.sofms = []
-		i = 0
-		while i < 16:
-			self.sofms.append(algorithms.SOFM(
-				n_inputs=24*8,			# 8 days of data
-				features_grid=(10,10), 	# 100 categories
+    """
+    makes predictions for the prize of gas
+    """
 
-				#distance = euclid,
-				shuffle_data = True,
-				learning_radius=3,
-				reduce_radius_after = int(NUMBER_OF_EPOCHS / 6),
-				reduce_step_after = 10,
-				reduce_std_after = 20,
-		
-				#weight = 'sample_from_data',	# start with random weights from data
-				weight = init.Normal(mean = 0, std = 10),
-				
-				step=0.8,
+    def __init__(self):
 
-				show_epoch = '10 times',
-				verbose = False,
-			))
-			i = i + 1
-		
-		# find SOFM for ID
-		self.lookupID = {0: -1}
-		
-		# find all IDs for SOFM
-		self.lookupSOFMS = []
-		for i in range(0, 16):
-			self.lookupSOFMS.append([])
-		
-	
-	def train(self, gasStations, date, datasize):
-		""" 
-		train the SOFM with the given data
-		"""
-		
-		self.trainingDate = date
-		self.trainRough(gasStations, date)
-		self.trainFineParallel(gasStations, date, datasize)
-		
-		
-	def trainRough(self, gasStations, date):	
-		dimension = len(gasStations.getDailyData(1, date))
-		self.rough = algorithms.SOFM(
-			n_inputs = dimension,		# max 365 days of data
-			features_grid=(4,4), 	# 100 categories
-			
-			shuffle_data = True,
-			learning_radius = 5,
-			reduce_radius_after = 2,
-			reduce_step_after = 2,
-			reduce_std_after = 3,
-			step=0.5,
-			weight = 'sample_from_data',	# start with random weights from data
-			
-			show_epoch = '5 times',
-			verbose = True,
-		)
-		
-		data_array = np.zeros((gasStations.getCount(), dimension))
-		ID = 1
-		i = 0
-		while i < gasStations.getCount():
-			while gasStations.noData(ID):
-				# find gas station with data
-				ID = gasStations.nextID(ID)
-			data = gasStations.getDailyData(ID, date)
-			data_array[i] = data[:]
-			i = i + 1
-			ID = gasStations.nextID(ID)
-		
-		# sort gas stations roughly
-		self.rough.init_weights(data_array)
-		self.rough.train(data_array, epochs = 20)
-		
-		ID = 1
-		i = 0
-		
-		# assign gas stations to category
-		while i < gasStations.getCount():
-			while gasStations.noData(ID):
-				# find gas station with data
-				ID = gasStations.nextID(ID)
-			data = gasStations.getDailyData(ID, date)
-			y = np.nonzero(self.rough.predict(data)[0] == 1)[0][0]
-			self.lookupSOFMS[y].append(ID)
-			lookup = {ID:y}
-			self.lookupID.update(lookup)
-			i = i + 1
-			ID = gasStations.nextID(ID)
-		
-		#for i in range(0,100):
-		#	print(len(self.lookupSOFMS[i]))
-			
-		
-		
-	
-	def trainFine(self, gasStations, date, datasize):
-		print("train SOMFS")
-		for i in range (0, 16):
-			if len(self.lookupSOFMS[i]) != 0:
-				# only train SOFMS with associated gas stations
-				self.trainSOFM(i, gasStations, date, datasize)
-		
-	
-	def trainFineParallel(self, gasStations, date, datasize):
-		print ("train SOFMS parallel")
-		t2 = time.time()	
-		
-		i = 0
-		P = []
-		while i < 16:
-			P = []
-			a = 0
-			while a < NUMBER_OF_CORES and i < 16:
-				if len(self.lookupSOFMS[i]) != 0:
-					P.append(Process(target=self.trainSOFM, args=(i, gasStations, date, datasize,)))
-					a = a + 1
-				i = i+1
-			for j in range (0,len(P)):
-				P[j].start()
-			for j in range (0,len(P)):
-				P[j].join()
-		
-		t3 = time.time()	
-		
-		dt = t3-t2
-		print("finished in", dt, "seconds")
-	
-	
-	def trainSOFM(self, sofmID, gasStations, date, datasize):
-		if len(self.lookupSOFMS[sofmID]) != 0:
-			data_array = np.zeros((datasize, 24*8))
-			j = 0
-			i = 0
-			while i < datasize:
-				ID = self.lookupSOFMS[sofmID][j]
-				j = (j+1)%len(self.lookupSOFMS[sofmID])
-				data = gasStations.randomData(ID, date)
-				flattened_data = [y - data[0][0] for x in data for y in x]
-				data_array[i]= flattened_data[:]
-				i = i+1
-			
-			self.sofms[sofmID].train(data_array, epochs = NUMBER_OF_EPOCHS)	
-		
-	def forecast(self, ID, date, hour, gasStations):
-		""" TO DO:
-		predict prize
-		"""
-		sofmID = self.lookupID[ID]
-		history = gasStations.findID(ID)[4][self.trainingDate-6 : self.trainingDate+1]
-		history = [y for x in history for y in x]
-		history = np.asarray(history)
-		weights = self.sofms[sofmID].weight
-	
-		d = date-self.trainingDate
-		if (d > 0):
-			for i in range(0, d+1):
-				prediction = self.simpleForecast(weights, history)
-				history = np.append(history[24:], prediction)
-			return prediction[hour]
-		else:
-			print("NOTE: requestet prize is not in the future")
-			return gasStations.findID(ID)[4][date][hour]
-		
-		
-	def simpleForecast(self, weights, history):
-		# returns one day of forecasting
-		a = history
-		start = a[0]
-		a = a-start
-		dist = np.linalg.norm(a - weights[:168, 0])
-		best_matching = 0
-		for i in range(0, weights.shape[1]):
-			# visit all columns
-			d = np.linalg.norm(a - weights[:168, i])
-			if d < dist:
-				dist = d
-				best_maching = i
-		#return day plus first value
-		#print(best_matching)
-		#print (weights[:, best_matching])
-		return weights[168:193,best_matching] + start
-			
-			
+        HALF_LIFE = 20
+
+        # 16 sofms for each category one
+        self.sofms = []
+        i = 0
+        while i < 16:
+            self.sofms.append(algorithms.SOFM(
+                n_inputs=24*8,			# 8 days of data
+                features_grid=(10,10), 	# 100 categories
+
+                #distance = euclid,
+                shuffle_data = True,
+                learning_radius=3,
+                reduce_radius_after = int(NUMBER_OF_EPOCHS / 6),
+                reduce_step_after = 10,
+                reduce_std_after = 20,
+
+                #weight = 'sample_from_data',	# start with random weights from data
+                weight = init.Normal(mean = 0, std = 10),
+
+                step=0.8,
+
+                show_epoch = '10 times',
+                verbose = False,
+            ))
+            i = i + 1
+
+        # find SOFM for ID
+        self.lookupID = {0: -1}
+
+        # find all IDs for SOFM
+        self.lookupSOFMS = []
+        for i in range(0, 16):
+            self.lookupSOFMS.append([])
+
+
+    def train(self, gasStations, date, datasize):
+        """
+        train the SOFM with the given data
+        """
+
+        self.trainingDate = date
+        self.trainRough(gasStations, date)
+        self.trainFineParallel(gasStations, date, datasize)
+
+
+    def trainRough(self, gasStations, date):
+        dimension = len(gasStations.getDailyData(1, date))
+        self.rough = algorithms.SOFM(
+            n_inputs = dimension,		# max 365 days of data
+            features_grid=(4,4), 	# 100 categories
+
+            shuffle_data = True,
+            learning_radius = 5,
+            reduce_radius_after = 2,
+            reduce_step_after = 2,
+            reduce_std_after = 3,
+            step=0.5,
+            weight = 'sample_from_data',	# start with random weights from data
+
+            show_epoch = '5 times',
+            verbose = True,
+        )
+
+        data_array = np.zeros((gasStations.getCount(), dimension))
+        ID = 1
+        i = 0
+        while i < gasStations.getCount():
+            while gasStations.noData(ID):
+                # find gas station with data
+                ID = gasStations.nextID(ID)
+            data = gasStations.getDailyData(ID, date)
+            data_array[i] = data[:]
+            i = i + 1
+            ID = gasStations.nextID(ID)
+
+        # sort gas stations roughly
+        self.rough.init_weights(data_array)
+        self.rough.train(data_array, epochs = 20)
+
+        ID = 1
+        i = 0
+
+        # assign gas stations to category
+        while i < gasStations.getCount():
+            while gasStations.noData(ID):
+                # find gas station with data
+                ID = gasStations.nextID(ID)
+            data = gasStations.getDailyData(ID, date)
+            y = np.nonzero(self.rough.predict(data)[0] == 1)[0][0]
+            self.lookupSOFMS[y].append(ID)
+            lookup = {ID:y}
+            self.lookupID.update(lookup)
+            i = i + 1
+            ID = gasStations.nextID(ID)
+
+        #for i in range(0,100):
+        #	print(len(self.lookupSOFMS[i]))
+
+
+
+
+    def trainFine(self, gasStations, date, datasize):
+        print("train SOMFS")
+        for i in range (0, 16):
+            if len(self.lookupSOFMS[i]) != 0:
+                # only train SOFMS with associated gas stations
+                self.trainSOFM(i, gasStations, date, datasize)
+
+
+    def trainFineParallel(self, gasStations, date, datasize):
+        print ("train SOFMS parallel")
+        t2 = time.time()
+
+        i = 0
+        P = []
+        while i < 16:
+            P = []
+            a = 0
+            while a < NUMBER_OF_CORES and i < 16:
+                if len(self.lookupSOFMS[i]) != 0:
+                    P.append(Process(target=self.trainSOFM, args=(i, gasStations, date, datasize,)))
+                    a = a + 1
+                i = i+1
+            for j in range (0,len(P)):
+                P[j].start()
+            for j in range (0,len(P)):
+                P[j].join()
+
+        t3 = time.time()
+
+        dt = t3-t2
+        print("finished in", dt, "seconds")
+
+
+    def trainSOFM(self, sofmID, gasStations, date, datasize):
+        if len(self.lookupSOFMS[sofmID]) != 0:
+            data_array = np.zeros((datasize, 24*8))
+            j = 0
+            i = 0
+            while i < datasize:
+                ID = self.lookupSOFMS[sofmID][j]
+                j = (j+1)%len(self.lookupSOFMS[sofmID])
+                data = gasStations.randomData(ID, date)
+                flattened_data = [y - data[0][0] for x in data for y in x]
+                data_array[i]= flattened_data[:]
+                i = i+1
+
+            self.sofms[sofmID].train(data_array, epochs = NUMBER_OF_EPOCHS)
+
+    def forecast(self, ID, date, hour, gasStations):
+        """ TO DO:
+        predict prize
+        """
+        sofmID = self.lookupID[ID]
+        history = gasStations.findID(ID)[4][self.trainingDate-6 : self.trainingDate+1]
+        history = [y for x in history for y in x]
+        history = np.asarray(history)
+        weights = self.sofms[sofmID].weight
+
+        d = date-self.trainingDate
+        if (d > 0):
+            for i in range(0, d+1):
+                prediction = self.simpleForecast(weights, history)
+                history = np.append(history[24:], prediction)
+            return prediction[hour]
+        else:
+            print("NOTE: requestet prize is not in the future")
+            return gasStations.findID(ID)[4][date][hour]
+
+
+    def simpleForecast(self, weights, history):
+        # returns one day of forecasting
+        a = history
+        start = a[0]
+        a = a-start
+        dist = np.linalg.norm(a - weights[:168, 0])
+        best_matching = 0
+        for i in range(0, weights.shape[1]):
+            # visit all columns
+            d = np.linalg.norm(a - weights[:168, i])
+            if d < dist:
+                dist = d
+                best_maching = i
+        #return day plus first value
+        #print(best_matching)
+        #print (weights[:, best_matching])
+        return weights[168:193,best_matching] + start
+
+
 
 class Supervisor:
-	"""
-	manages workflow
-	"""
-	
-	def __init__(self):
-		""" TO DO:
-		create gas stations, read historic data from files
-		"""
-		self.gasStations = GasStation()
-	
-	def handleRoute(self, file):
-		""" TO DO:
-		- input route
-		- create model
-		- train model
-		- predict prizes --> appendPrize
-		- call Strategy with 'new' route
-		- call appendAmount(Strategys solution)
-		- write solution to file
-		"""
-		
-	def handlePrizingForecast(self, file):
-		""" TO DO:
-		- input requests
-		- for each request:
-			- create model
-			- train model
-			- make prediction
-		- store results in list
-		- call appendPrize(list)
-		- write solution to file
-		"""
-		
-	def handleHandle(self):
-		""" TO DO:
-		- call right function at the right time
-		- control user
-		"""
-		M = Model()
-		M.train(self.gasStations, 400, 500)
-		for i in [1,2,3,4,5,10,15, 20, 25, 30]:
-			print(M.forecast(6, 400+i, 4, self.gasStations))
-			print(self.gasStations.findID(6)[4][400+i][4])
+    """
+    manages workflow
+    """
 
-		
+    def __init__(self):
+        """ TO DO:
+        create gas stations, read historic data from files
+        """
+        self.gasStations = GasStation()
+
+    def handleRoute(self, file):
+        """ TO DO:
+        - input route
+        - create model
+        - train model
+        - predict prizes --> appendPrize
+        - call Strategy with 'new' route
+        - call appendAmount(Strategys solution)
+        - write solution to file
+        """
+
+    def handlePrizingForecast(self, file):
+        """ TO DO:
+        - input requests
+        - for each request:
+            - create model
+            - train model
+            - make prediction
+        - store results in list
+        - call appendPrize(list)
+        - write solution to file
+        """
+
+    def handleHandle(self):
+        """ TO DO:
+        - call right function at the right time
+        - control user
+        """
+        M = Model()
+        M.train(self.gasStations, 400, 500)
+        for i in [1,2,3,4,5,10,15, 20, 25, 30]:
+            print(M.forecast(6, 400+i, 4, self.gasStations))
+            print(self.gasStations.findID(6)[4][400+i][4])
+
+
 t1 = time.time()
-	
+
 #M = Model()
 #M.train([])
 
