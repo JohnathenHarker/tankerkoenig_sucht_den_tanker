@@ -507,7 +507,27 @@ class Model:
 
         # 16 sofms for each category one
         self.sofms = []
+       
+
+        # find SOFM for ID
+        self.lookupID = {0: -1}
+
+        # find all IDs for SOFM
+        self.lookupSOFMS = []
+        for i in range(0, 16):
+            self.lookupSOFMS.append([])
+
+
+    def train(self, gasStations, date, datasize):
+        """
+        train the SOFM with the given data
+        """
+
+        self.trainingDate = date
+        self.trainRough(gasStations, date)
+		
         i = 0
+		
         while i < 16:
             self.sofms.append(algorithms.SOFM(
                 n_inputs=24*8,			# 8 days of data
@@ -529,23 +549,7 @@ class Model:
                 verbose = False,
             ))
             i = i + 1
-
-        # find SOFM for ID
-        self.lookupID = {0: -1}
-
-        # find all IDs for SOFM
-        self.lookupSOFMS = []
-        for i in range(0, 16):
-            self.lookupSOFMS.append([])
-
-
-    def train(self, gasStations, date, datasize):
-        """
-        train the SOFM with the given data
-        """
-
-        self.trainingDate = date
-        self.trainRough(gasStations, date)
+			
         self.trainFineParallel(gasStations, date, datasize)
 
 
