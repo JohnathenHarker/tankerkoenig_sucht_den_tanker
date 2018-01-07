@@ -695,9 +695,9 @@ class Model:
 
 			self.sofms[sofmID].train(data_array, epochs = NUMBER_OF_EPOCHS)
 			
-		if sofmID == 5 :
-			print("map4:", self.sofms[sofmID].weight[:192, 4])
-			print("map80:", self.sofms[sofmID].weight[:192, 80])
+		#if sofmID == 5 :
+		#	print("map4:", self.sofms[sofmID].weight[:192, 4])
+		#	print("map80:", self.sofms[sofmID].weight[:192, 80])
 			
 		return
 
