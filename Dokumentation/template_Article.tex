@@ -10,12 +10,20 @@
 \maketitle
 
 \begin{abstract}
-	Im Folgenden soll unsere Lösung der Aufgaben des 13. InformatiCup 2018 vorgestellt werden. Dabei möchten wir unsere Annahmen zur Aufgabenstellung, 
+	Im Folgenden soll unsere Lösung der Aufgaben des 13. InformatiCup 2018 vorgestellt werden. Dabei möchten wir unsere Annahmen zur Aufgabenstellung, unsere Lösung für beide Probleme und deren Bewertung, und einen Ausblick unserer Lösung beschreiben und erklären.  
 \end{abstract}
 
-\section{Annahmen zur Aufgabenstellung}
-\section{Lösungsansatz}
+\section{Annahmen zur Aufgabenstellung und Umformungen der Eingabedaten}
+	Für Umsetzung unserer Lösung mussten wir dafür sorgen, dass die Werte nicht nur eingelesen, sondern auch so umgeformt werden, dass bestimmte Kriterien erfüllen. Solche Kriterien sind die Vergleichbarkeit, die Sicherstellung der Individualität einer Entität, die Kontinuität der Daten, eine annehmbare Menge an Daten und die Diskretisierung der Werte, wobei nur bestimmte Kriterien bei bestimmten Arten der Eingabedaten Sinn ergeben. 
+\subsection{Umformung der Tankstellendaten}
+	Die Datei der Tankstellendaten stellt sehr viele unterschiedliche Daten zur Verfügung. Die reichen von der ID der Tankstelle, über die Postleitzahl zu den Koordinaten der Tankstelle. Von Bedeutung sind aber nach den oben angesprochen Kriterien nur die folgenden: \\ 
+\subsection{Umformung der historischen Benzinpreisdaten}
+	Die Daten die wohl am wichtigsten für die Voraussage der Benzinpreise selbst sind, sind die historischen Tankstellendaten. So haben wir uns dazu entschlossen diese in folgender Weise umzuformen: \\
+	
+\subsection{Umformung der Routendaten}
+\section{Lösung}
 \subsection{Entwurf und Struktur der Lösung}
+	Hier könnte Ihr Klassendiagramm stehen.
 \subsubsection{Klasse GasStation}
 	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
 	
@@ -30,12 +38,44 @@
 	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
 \subsubsection{Klasse Strategy}
 	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
-\subsection{Ansatz zur Lösung der Benzinpreis-Vorhersage-Problems}
-	Welche Algorithmen wurde hier benutzt uns was versprechen wir uns davon? Warum haben wir das ganze in Intervalle unterteilt? Gehen wir auf etwaige Sonderdaten wie in der Aufgabenstellung genannt ein \(Schulferien, Adresse,\)
+\subsection{Lösung der Benzinpreis-Vorhersage-Problems}
+\subsubsection{Ansatz}
+	Welche Algorithmen wurde hier benutzt uns was versprechen wir uns davon? Warum haben wir das ganze in Intervalle unterteilt? Gehen wir auf etwaige Sonderdaten wie in der Aufgabenstellung genannt ein (Schulferien, Adresse,) 
+	\newline
+	\newline
+	Wir sollen das ganze an folgenden vergleichbaren Schritten herleiten und erklären:
+	\begin{enumerate}
+		\item \begin{quote}
+			Entscheiden Sie, ob Sie ein Vohersagemodell für alle Tankstellen oder individuelle Vorhersagemodelle für einzelne Tankstellen oder für Klassen von öhnlichen Tankstellen entwickeln wollen. Überlegen Sie sich dazu den möglichen Einfluss von Mermalen einer Tankstelle auf die Entwicklung ihrer Benzinpreise (z.B. Tankstellen an Autobahnen, Tankstellen die vom Berufsverkehr erfasst werden oder Tankstellen in wenig erschlossenen Regionen). Dokumentieren Sie ihre Ergebnisse.
+		\end{quote}
+		\item Zusätzliche Informationen?
+		\item Diskutieren der Prognoseergebniss
+	\end{enumerate}
+	
+	Und zusätzlich:
+	\begin{quote}
+		Überlegen Sie im nächsten Schritt, welche zusätzlichen Informationen wie zum Beispiel die Wochentage, Ferienzeiten oder Verkehrsinformationen für Ihre Benzinpreisvorhersagen sinnvoll sein könnten. Erweitern Sie Ihre Vorhersagemodelle entsprechend und dokumentieren Sie Ihre Ergebnisse.
+	\end{quote}
+\subsubsection{Umsetzung der Lösung}
+	Wie haben wir diese Idee umgesetzt? Warum haben wir wie viele Dimensionen an die SOM/SOFM vergeben? Warum halten wir das für sinnvoll?
+\subsubsection{Bewertung der Lösung}
+	Hier könnte Ihr Diagramm stehen. \\
+	Wie gut ist das was wir da gebastelt haben?
+	\begin{quote}
+		Diskutieren Sie die Güte Ihrer erzielten Prognoseergebnisse für den geforederten Vorhersagezeitraum (d.h. bis zu einem Monat in die Zukunft). Verwenden Sie dazu geeignete Maßzahlen für die Güte Ihrer Vorhersagemodelle.
+	\end{quote}
+\subsection{Lösung des Routenproblems}
+\subsubsection{Ansatz der Lösung}
+\subsubsection{Umsetzung der Lösung}
+
 \section{Ausblick und Erweiterungen}
 	InformatiCup sagt, dass man tolle Erweiterungen einfügen könnte. Ein kleiner Auszug: 
 	\begin{quote}
 		Falls nach der erfolgreichen Implementierung der Grundanforderungen noch Zeit für Erweiterungen bleibt, seien Sie kreativ, zum Beispiel mit einer mobilen App für echte Benzinpreisvorhersagen unterwegs. Oder passen Sie Ihre Softwareanwendung für die Ausführung in der Cloud für eine hohe Performanz, Skalierbarkeit und Verfügbarkeit an. Sie möchten nicht mit einem durchschnittlichen Kraftstoffverbrauch rechnen? Integrieren sie mögliche Spezialsoftware für die Simulation des Benzinverbrauchs. Oder verwenden Sie Daten aus Online-Kalendern als Grundlage für Ihre Fahrzeugrouten. Seien Sie kreativ!
+	\end{quote}
+	Uns weiterhin:
+	\begin{quote}
+		... Ausblick: Lässt sich Ihr Verfahren vielleicht auf auf Ladevorgänge in der Elektromobilität oder für ganz andere Aufgabenstellungen anwenden?
 	\end{quote}
 	
 \end{document}
