@@ -15,7 +15,7 @@ class Strategy:
 		self.gasStation = None
 
 	def calculate(self, route, gasStation):
-		""" TO DO:
+		"""
 		- compute best strategy for fueling and return it
 		"""
 
