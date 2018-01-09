@@ -746,10 +746,10 @@ class Model:
 	def evaluate(self, gasStations):
 		data = np.zeros((30,2))
 		begin = self.trainingDate
-		rounds = 200
+		rounds = 1000
 		for day in range(0,30):
-			d1 = 0
-			d2 = 0
+			d1 = []
+			d2 = []
 			for i in range(0, rounds):
 				station = int(random.random()* (gasStations.count-1))+1
 				hour = int(random.random() * 23)
@@ -760,10 +760,10 @@ class Model:
 
 					dif1 = abs(b-a)
 					dif2 = abs(c-b)
-					d1 = d1 + dif1
-					d2 = d2 + dif2
-			dif1 = d1/rounds
-			dif2 = d2/rounds
+					d1.append(dif1)
+					d2.append(dif2)
+			dif1 = np.median(np.asarray(d1))
+			dif2 = np.median(np.asarray(d2))
 			data[day][0] = dif1
 			data[day][1] = dif2
 			
