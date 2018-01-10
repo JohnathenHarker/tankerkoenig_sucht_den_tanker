@@ -257,7 +257,7 @@ class Model:
 	def evaluate(self, gasStations):
 		data = np.zeros((30,2))
 		begin = self.trainingDate
-		rounds = 1000
+		rounds = 200
 		for day in range(0,30):
 			d1 = []
 			d2 = []

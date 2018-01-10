@@ -1,5 +1,5 @@
-from .GasStation import GasStation
-from .Route import Route
+#from Input.GasStation import GasStation
+#from Input.Route import Route
 import math as M
 
 class Strategy:

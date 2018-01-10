@@ -1,7 +1,7 @@
-import GasStation
+from Input import *
 
-from .Strategy import Strategy
-from .Model import Model
+from Strategy import Strategy
+from Model import Model
 
 
 class Supervisor:

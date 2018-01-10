@@ -1,4 +1,4 @@
-from .Supervisor import Supervisor
+from Supervisor import Supervisor
 import time
 
 def main():
