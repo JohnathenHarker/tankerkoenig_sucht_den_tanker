@@ -179,10 +179,10 @@ class Model:
 
 				#distance = euclid,
 				shuffle_data = True,
-				learning_radius=4,
-				reduce_radius_after = int(NUMBER_OF_EPOCHS / 4),
+				learning_radius=3,
+				reduce_radius_after = int(NUMBER_OF_EPOCHS / 3),
 				reduce_step_after = 10,
-				reduce_std_after = 10,
+				reduce_std_after = 8,
 
 				#weight = 'sample_from_data',	# start with random weights from data
 				weight = init_weight,
@@ -225,7 +225,7 @@ class Model:
 		d = date-self.trainingDate
 		if (d > 0):
 			for i in range(0, d):
-				prediction = self.simpleForecast(weights, history)
+				prediction = self.simpleForecast(weights, history, d)
 				history = np.append(history[24:], prediction)
 			return prediction[hour]
 		else:
@@ -233,7 +233,7 @@ class Model:
 			return gasStations.findID(ID)[4][date][hour]
 
 
-	def simpleForecast(self, weights, history):
+	def simpleForecast(self, weights, history, step):
 		# returns one day of forecasting
 		a = history
 		start = a[167]
@@ -251,18 +251,18 @@ class Model:
 		#return day plus first value
 		#print("best:",best_matching)
 		#print (weights[:, best_matching])
-		return weights[168:193,best_matching] + start
+		return weights[168:193,best_matching]*pow(0.997, pow(step, 1.1)) + start
 
 	
 	def evaluate(self, gasStations):
 		data = np.zeros((30,2))
 		begin = self.trainingDate
-		rounds = 200
+		rounds = 990
 		for day in range(0,30):
 			d1 = []
 			d2 = []
 			for i in range(0, rounds):
-				station = int(random.random()* (gasStations.count-1))+1
+				station = i+1
 				hour = int(random.random() * 23)
 				if not gasStations.noData(station):
 					a = self.forecast(station, begin+day, hour, gasStations) 	# prediction
@@ -283,9 +283,9 @@ class Model:
 		plt.xlabel('Tage hinter bekanntem Preis')
 		plt.show()
 		
-		plt.plot(data[:, 1:2])
-		plt.ylabel('Durchschnittliche Abweichung vom letzten bekannten Wert (0,1 ct)')
-		plt.xlabel('Tage hinter bekanntem Preis')
-		plt.show()
+		#plt.plot(data[:, 1:2])
+		#plt.ylabel('Durchschnittliche Abweichung vom letzten bekannten Wert (0,1 ct)')
+		#plt.xlabel('Tage hinter bekanntem Preis')
+		#plt.show()
 		np.savetxt('evaluation.csv', data, delimiter=';')
 		print("model evaluated")
