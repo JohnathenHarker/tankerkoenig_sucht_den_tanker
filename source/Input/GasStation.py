@@ -17,8 +17,8 @@ class GasStation:
 		self.prizingTable = []
 		t1 = time.clock()
 		# read table of gas stations
-		with open('../geg. Dateien/Eingabedaten/Tankstellen_short.csv', encoding='utf-8') as csvfile:
-		#with open('../geg. Dateien/Eingabedaten/Tankstellen.csv') as csvfile:
+		#with open('../geg. Dateien/Eingabedaten/Tankstellen_short.csv', encoding='utf-8') as csvfile:
+		with open('../geg. Dateien/Eingabedaten/Tankstellen.csv') as csvfile:
 			readCSV = csv.reader(csvfile, delimiter=';')
 			id = 1
 			for row in readCSV:
@@ -29,7 +29,7 @@ class GasStation:
 				nord = float(row[7])
 				sued = float(row[8])
 
-				self.prizingTable.append((id, marke, nord, sued, self.read(500, id)))
+				self.prizingTable.append((id, marke, nord, sued, self.read(1000, id)))
 				id = id+1
 		# read historic data
 

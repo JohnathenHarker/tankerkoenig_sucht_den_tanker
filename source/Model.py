@@ -255,14 +255,14 @@ class Model:
 
 	
 	def evaluate(self, gasStations):
-		data = np.zeros((30,2))
+		data = np.zeros((40,2))
 		begin = self.trainingDate
-		rounds = 990
-		for day in range(0,30):
+		rounds = 5000
+		for day in range(0,40):
 			d1 = []
 			d2 = []
-			for i in range(0, rounds):
-				station = i+1
+			for i in range(1, rounds):
+				station = int(random.random() * (gasStations.getCount()-1))+1
 				hour = int(random.random() * 23)
 				if not gasStations.noData(station):
 					a = self.forecast(station, begin+day, hour, gasStations) 	# prediction
