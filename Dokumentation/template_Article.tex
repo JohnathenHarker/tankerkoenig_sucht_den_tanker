@@ -1,6 +1,8 @@
 \documentclass[11pt]{article}
 
 \usepackage[utf8]{inputenc}
+\usepackage[scale=0.75,a4paper]{geometry}
+\usepackage[german]{babel}
 %opening
 \title{InformatiCup - Dokumentation}
 \author{Tilman Hinnerichs, Tobias John}
@@ -14,13 +16,32 @@
 \end{abstract}
 
 \section{Annahmen zur Aufgabenstellung und Umformungen der Eingabedaten}
-	Für Umsetzung unserer Lösung mussten wir dafür sorgen, dass die Werte nicht nur eingelesen, sondern auch so umgeformt werden, dass bestimmte Kriterien erfüllen. Solche Kriterien sind die Vergleichbarkeit, die Sicherstellung der Individualität einer Entität, die Kontinuität der Daten, eine annehmbare Menge an Daten und die Diskretisierung der Werte, wobei nur bestimmte Kriterien bei bestimmten Arten der Eingabedaten Sinn ergeben. 
+	Für Umsetzung unserer Lösung mussten wir dafür sorgen, dass die Werte nicht nur eingelesen, sondern auch so umgeformt werden, dass diese bestimmte Kriterien erfüllen.  
 \subsection{Umformung der Tankstellendaten}
-	Die Datei der Tankstellendaten stellt sehr viele unterschiedliche Daten zur Verfügung. Die reichen von der ID der Tankstelle, über die Postleitzahl zu den Koordinaten der Tankstelle. Von Bedeutung sind aber nach den oben angesprochen Kriterien nur die folgenden: \\ 
+	Die Datei der Tankstellendaten stellt sehr viele unterschiedliche Daten zur Verfügung. Die reichen von der ID der Tankstelle, über die Postleitzahl zu den Koordinaten der Tankstelle. Für unser Verfahren ist sind folgende Kriterien wichtig: \\
+	\begin{enumerate}
+		\item \textbf{Individualität} der Tankstellen um diese eindeutig zuordnen und um über diese in einer Liste iterieren zu können
+		\item \textbf{Örtliche Zuordnung} der Tankstellen um zwischen ihnen Abstände zu errechnen
+	\end{enumerate} 
+	Um eventuell später Zusammenhänge einzubeziehen oder wiederzuerkennen, haben wir zusätzlich die Marke der einzelnen Tankstellen mit einbezogen. Dies bildet aber zur Erfüllung der obigen Kriterien keinen Mehrwert. \\
+	So werden bei der Einbeziehung der Tankstellendaten nur deren ID, Marke und Koordinaten aus den Tankstellendaten aus oben genannten Gründen herausgelesen. 
 \subsection{Umformung der historischen Benzinpreisdaten}
-	Die Daten die wohl am wichtigsten für die Voraussage der Benzinpreise selbst sind, sind die historischen Tankstellendaten. So haben wir uns dazu entschlossen diese in folgender Weise umzuformen: \\
-	
+	Die Daten, die wohl am wichtigsten für die Voraussage der Benzinpreise selbst sind, sind die historischen Tankstellendaten. Bei diesen stehen Tausende von Daten pro Tankstelle zur Verfügung. Pro Änderung des Benzinpreises stehen dabei das Datum mit der Uhrzeit mit einer Genauigkeit bis auf die Sekunde genau und der zugehörige neue E5-Benzinpreis zur Verfügung. 
+	\\
+	Kriterien für die Umformung dieser Daten sind die folgenden:
+	\begin{enumerate}
+		\item \textbf{Vergleichbarkeit} der Datensätze um mit ihnen eine Einteilung in bestimmte Kategorien vorzunehmen
+		\item \textbf{Kontinuität} der Daten um eine Vergleichbarkeit der Daten bestimmter gleicher Intervalle zu erreichen und um diese in Algorithmen einfüttern zu können
+		\item \textbf{Diskretisierung} der gemessenen Zeitpunkte
+		\item \textbf{Handhabbare Menge} an Daten um mit ihnen noch in annehmbarer Zeit rechnen zu können, aber ebenfalls noch so viel, dass nicht zu viel Information verloren geht
+	\end{enumerate}
+
+	Um eine Vergleichbarkeit der Datensätze zu gewährleisten mussten wir die Kontinuität der Daten erreichen. Dazu rundeten wir jeden der Änderungszeitpunkte auf seine Stunde herunter und rechneten dabei ebenfalls die zugehörige Zeitverschiebung mit ein. Ebenfalls reicherten wir die Daten mit den Preisen zwischen diesen Änderungszeitpunkten an. Was auf den ersten Blick recht trivial wirkt, nimmt bei weiteren Algorithmen sehr viel Arbeit ab. So beträgt beispielsweise der Benzinpreise nach einer Änderung auf ein bestimmtes Niveau bis zu seiner nächsten Änderung diesen Wert bei. Durch diese Anreicherung besteht ein jeder Tag von Werten in der Geschichte einer Tankstelle aus 24 Werten. Dies bietet ebenfalls eine wunderbare Unabhängigkeit von schnell schwankenden Preisen innerhalb eines Tages und eben die oben gewünschte Vergleichbarkeit, da nun die Werte eines Tages mit 24 Werten dargestellt werden können. Damit ist zugleich die Kontinuität durch die gleichen Intervalle zwischen den Messpunkten und die Diskretisierung durch 24 feste Punkte innerhalb der sonst linearen Zeit gegeben. \\ Abschließend ist aus unserer Sicht das dilemmaartige vierte Kriterium der handhabbaren Menge an Daten gewährleistet. So sind durch die Einteilung noch eine Menge von $ 24 * 365 * 3 = 26.280 $ Werten (bei ca. 3 betrachteten Jahren der historischen Tankstellenwerte) vorhanden, was eine ausreichende Genauigkeit für zukünftige Voraussagen mit unserer Methode bietet und eine für Computer komfortable Anzahl an Werte bildet.
+		
 \subsection{Umformung der Routendaten}
+	Die Routendaten sind vor allem für die Berechnung der besten Route von Bedeutung. Diese enthalten neben der maximalen Tankkapazität des Fahrzeugs auch die Ankunftszeiten an den bestimmten Tankstellen, sowie deren ID. Um hier die Kausalität der bisherigen Daten weiterzuführen, diskretisieren wir wieder die Daten auf die volle Stunde und verwerfen für unser Modell zu spezifische  Daten wie Minuten und Sekunden. Weitere Annahmen müssen dabei für die Routendaten nicht getätigt werden, um sie in Konformität zu bringen.
+\subsection{Umformung der Preisvorhersagedaten}
+	Die getätigten Annahmen zu den Preisvorhersagedaten sind ähnlichen zu den unter \glqq Umformung der Routendaten\grqq{} getätigten Annahmen. So wird wieder sowohl der Zeitpunkt, welcher als zuletzt bekannt angenommen werden soll, als auch der Zeitpunkt, bis zu welchem die Vorhersage reichen soll, auf die jeweilige Stunde gerundet, um in das oben angerissene Datenmodell zu passen.
 \section{Lösung}
 \subsection{Entwurf und Struktur der Lösung}
 	Hier könnte Ihr Klassendiagramm stehen.
@@ -62,7 +83,7 @@
 	Hier könnte Ihr Diagramm stehen. \\
 	Wie gut ist das was wir da gebastelt haben?
 	\begin{quote}
-		Diskutieren Sie die Güte Ihrer erzielten Prognoseergebnisse für den geforederten Vorhersagezeitraum (d.h. bis zu einem Monat in die Zukunft). Verwenden Sie dazu geeignete Maßzahlen für die Güte Ihrer Vorhersagemodelle.
+		Diskutieren Sie die Güte Ihrer erzielten Prognoseergebnisse für den geforederten Vorhersagezeitraum (d.h. bis zu einem Monat in die Zukunft). Verwenden Sie dazu geeignete Maßzahlen für die Güte Ihrer Vorhersagemodelle. 
 	\end{quote}
 \subsection{Lösung des Routenproblems}
 \subsubsection{Ansatz der Lösung}
