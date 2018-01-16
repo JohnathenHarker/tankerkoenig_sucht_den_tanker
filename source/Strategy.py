@@ -8,7 +8,6 @@ class Strategy:
 	formerly known as tFontF
 	"""
 	def __init__(self):
-		print("Calculating best route")
 		self.capacity = 0
 		self.route = []
 		self.bestRoute = []
@@ -18,6 +17,8 @@ class Strategy:
 		"""
 		- compute best strategy for fueling and return it
 		"""
+
+		print("Calculating best route")
 
 		self.capacity = route.capacity
 		self.route = route.route
@@ -53,8 +54,12 @@ class Strategy:
 		prize = 0
 		currentGas = 0
 		for currentNode in range(len(self.naiveRoute)-1):
-			fillingValue = self.capacity-currentGas
-			self.bestRoute[currentNode] = fillingValue
+			print("CurrentNode:", currentNode, "CurrentGas:", currentGas)
+			fillingValue = self.capacity - currentGas
+			print("fillingValue:", fillingValue)
+			self.naiveRoute[currentNode] = fillingValue
+			currentGas = self.capacityi
+			print("Prize for current node:", self.prize(currentNode))
 			prize += fillingValue * self.prize(currentNode)
 
 			currentGas = currentGas - self.consumption(currentNode, currentNode+1)
@@ -164,4 +169,5 @@ class Strategy:
 			dist = distance(getIDfromPosInRoute(currentNode), getIDfromPosInRoute(currentNode+1))
 			consumptionPerKilometer = 5.6 /100.0
 			consumptionToNext = 1.0 * dist * consumptionPerKilometer
+			print("consumption:", currentNode, targetNode, consumptionToNext)
 			return consumptionToNext + self.consumption(currentNode+1, targetNode)

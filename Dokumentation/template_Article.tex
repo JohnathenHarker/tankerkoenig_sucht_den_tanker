@@ -42,23 +42,8 @@
 	Die Routendaten sind vor allem für die Berechnung der besten Route von Bedeutung. Diese enthalten neben der maximalen Tankkapazität des Fahrzeugs auch die Ankunftszeiten an den bestimmten Tankstellen, sowie deren ID. Um hier die Kausalität der bisherigen Daten weiterzuführen, diskretisieren wir wieder die Daten auf die volle Stunde und verwerfen für unser Modell zu spezifische  Daten wie Minuten und Sekunden. Weitere Annahmen müssen dabei für die Routendaten nicht getätigt werden, um sie in Konformität zu bringen.
 \subsection{Umformung der Preisvorhersagedaten}
 	Die getätigten Annahmen zu den Preisvorhersagedaten sind ähnlichen zu den unter \glqq Umformung der Routendaten\grqq{} getätigten Annahmen. So wird wieder sowohl der Zeitpunkt, welcher als zuletzt bekannt angenommen werden soll, als auch der Zeitpunkt, bis zu welchem die Vorhersage reichen soll, auf die jeweilige Stunde gerundet, um in das oben angerissene Datenmodell zu passen.
-\section{Lösung}
-\subsection{Entwurf und Struktur der Lösung}
-	Hier könnte Ihr Klassendiagramm stehen.
-\subsubsection{Klasse GasStation}
-	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
-	
-	Welche der vielen, vorhandenen Daten benutzen wir überhaupt? Warum können wir den Rest verwerfen?
-\subsubsection{Klasse Route}
-	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
-\subsubsection{Klasse PrizeForecast}
-	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
-\subsubsection{Klasse Supervisor}
-	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
-\subsubsection{Klasse Model}
-	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
-\subsubsection{Klasse Strategy}
-	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
+
+\section{Algorithmenidee}
 \subsection{Lösung der Benzinpreis-Vorhersage-Problems}
 \subsubsection{Ansatz}
 	Welche Algorithmen wurde hier benutzt uns was versprechen wir uns davon? Warum haben wir das ganze in Intervalle unterteilt? Gehen wir auf etwaige Sonderdaten wie in der Aufgabenstellung genannt ein (Schulferien, Adresse,) 
@@ -88,6 +73,23 @@
 \subsection{Lösung des Routenproblems}
 \subsubsection{Ansatz der Lösung}
 \subsubsection{Umsetzung der Lösung}
+\section{Implementierung und Umsetzung der Lösung}
+	Hier könnte Ihr Klassendiagramm stehen.	
+	Entwurf und Struktur der Lösung
+\subsection{Klasse GasStation}
+	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
+
+	Welche der vielen, vorhandenen Daten benutzen wir überhaupt? Warum können wir den Rest verwerfen?
+\subsection{Klasse Route}
+	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
+\subsection{Klasse PrizeForecast}
+	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
+\subsection{Klasse Supervisor}
+	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
+\subsection{Klasse Model}
+	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
+\subsection{Klasse Strategy}
+	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
 
 \section{Ausblick und Erweiterungen}
 	InformatiCup sagt, dass man tolle Erweiterungen einfügen könnte. Ein kleiner Auszug: 

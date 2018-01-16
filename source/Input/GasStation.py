@@ -18,7 +18,7 @@ class GasStation:
 		t1 = time.clock()
 		# read table of gas stations
 		#with open('../geg. Dateien/Eingabedaten/Tankstellen_short.csv', encoding='utf-8') as csvfile:
-		with open('../geg. Dateien/Eingabedaten/Tankstellen.csv') as csvfile:
+		with open('../geg. Dateien/Eingabedaten/Tankstellen.csv', encoding='utf-8') as csvfile:
 			readCSV = csv.reader(csvfile, delimiter=';')
 			id = 1
 			for row in readCSV:

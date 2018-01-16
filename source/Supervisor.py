@@ -20,7 +20,6 @@ class Supervisor:
 		t = time.clock()
 		strategy.calculate(route, gasStation)
 		print(route.route)
-
 	"""
 
 	def __init__(self):
