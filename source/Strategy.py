@@ -30,6 +30,36 @@ class Strategy:
 
 		print("Finished calculating.")
 
+		prize = 0
+		for i in range(len(self.bestRoute)):
+			prize += self.bestRoute[i] * self.prize(i)
+
+		return prize
+
+	def naiveCalculate(self, route, gasStation):
+		"""
+		Calculates the prize for a naive way of refilling. Always refills to full capacity
+		:param route:
+		:param gasStation:
+		:return:
+		"""
+
+		self.capacity = route.capacity
+		self.route = route.route
+		self.gasStation = gasStation
+
+		self.naiveRoute = [0] * len(self.route)
+
+		prize = 0
+		currentGas = 0
+		for currentNode in range(len(self.naiveRoute)-1):
+			fillingValue = self.capacity-currentGas
+			self.bestRoute[currentNode] = fillingValue
+			prize += fillingValue * self.prize(currentNode)
+
+			currentGas = currentGas - self.consumption(currentNode, currentNode+1)
+
+		return prize
 
 	def next(self, node):
 		if node == len(self.route)-1:
