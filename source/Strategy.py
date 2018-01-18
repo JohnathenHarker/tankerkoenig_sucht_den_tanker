@@ -58,7 +58,7 @@ class Strategy:
 			fillingValue = self.capacity - currentGas
 			print("fillingValue:", fillingValue)
 			self.naiveRoute[currentNode] = fillingValue
-			currentGas = self.capacityi
+			currentGas = self.capacity
 			print("Prize for current node:", self.prize(currentNode))
 			prize += fillingValue * self.prize(currentNode)
 
