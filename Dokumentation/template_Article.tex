@@ -72,7 +72,8 @@
 	\end{quote}
 \subsection{Lösung des Routenproblems}
 \subsubsection{Ansatz der Lösung}
-	Für die Lösung des Routenproblems wurde der in der Aufgabenstellung beschriebene Algorithmus \glqq To fill or not to fill\glqq{} benutzt. Der Ansatz allein bedarf deswegen keiner weiteren Erläuterung, wobei unsere Umsetzung hingegen erklärenswert ist.
+	Für die Lösung des Routenproblems wurde der in der Aufgabenstellung beschriebene Algorithmus \glqq To fill or not to fill\glqq{} benutzt. Der Ansatz allein bedarf deswegen keiner weiteren Erläuterung, wobei unsere Umsetzung hingegen erklärenswert ist.\\
+	\textbf{Das sehe ich anders. Es geht sicherlich auch darum, aus dem Paper den Algorithmus herauszulesen, d.h . wissenschaftliche Artikel zu verstehen. Wir sollten kurz zeigen, dass uns das gelungen ist. Außerdem muss hier unbedingt (!!!) noch die Quelle genannt werden.}
 \subsubsection{Umsetzung der Lösung}
 	Das Problem wurde dafür in mehrere Unterprobleme unterteilt, die sich wunderbar in einer Softwarelösung umsetzen lassen. So wurde dieses Problem in die Teilprobleme der Entfernungsberechnung, Preisfindung für eine spezifische Tankstelle auf der Route und den Algorithmus selbst untergliedert. \\
 	Für die Entfernungsberechnung wurde dabei die Formel für die Entfernung auf Großkreisen verwendet. Um von einer Tankstelle zu einer anderen Tankstelle zu fahren, wobei sich strikt an die vorgegebene Route gehalten werden muss wurde diese Entfernungsberechnung rekursiv aufgebaut. Eine Strecke von Knoten A zu Knoten B erfolgt demnach über die Berechnung und Summierung der Einzelstrecken zu den Knoten zwischen den A und B. Andere Methoden wie das direkte Fahren von A zu B, wenn dies der aktuelle Benzinstand zulässt, würde bei Routen wie der vorgegebenen Bertha-Benz-Memorial-Route, welche eine Rundreise darstellt, zu unerwünschten Effekten führen. \\
