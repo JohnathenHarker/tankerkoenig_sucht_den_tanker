@@ -72,7 +72,19 @@
 	\end{quote}
 \subsection{Lösung des Routenproblems}
 \subsubsection{Ansatz der Lösung}
+	Für die Lösung des Routenproblems wurde der in der Aufgabenstellung beschriebene Algorithmus \glqq To fill or not to fill\glqq{} benutzt. Der Ansatz allein bedarf deswegen keiner weiteren Erläuterung, wobei unsere Umsetzung hingegen erklärenswert ist.
 \subsubsection{Umsetzung der Lösung}
+	Das Problem wurde dafür in mehrere Unterprobleme unterteilt, die sich wunderbar in einer Softwarelösung umsetzen lassen. So wurde dieses Problem in die Teilprobleme der Entfernungsberechnung, Preisfindung für eine spezifische Tankstelle auf der Route und den Algorithmus selbst untergliedert. \\
+	Für die Entfernungsberechnung wurde dabei die Formel für die Entfernung auf Großkreisen verwendet. Um von einer Tankstelle zu einer anderen Tankstelle zu fahren, wobei sich strikt an die vorgegebene Route gehalten werden muss wurde diese Entfernungsberechnung rekursiv aufgebaut. Eine Strecke von Knoten A zu Knoten B erfolgt demnach über die Berechnung und Summierung der Einzelstrecken zu den Knoten zwischen den A und B. Andere Methoden wie das direkte Fahren von A zu B, wenn dies der aktuelle Benzinstand zulässt, würde bei Routen wie der vorgegebenen Bertha-Benz-Memorial-Route, welche eine Rundreise darstellt, zu unerwünschten Effekten führen. \\
+	Für das Auffinden der bereits errechnete Preise müssen diese bereits berechnet vorliegen. \\
+	Der Algorithmus selbst bildet dabei das Kernstück der Tankstrategie und wurde wie in dem Paper gegeben umgesetzt. Dafür müssen die folgenden Teilprobleme wie im Kapitel der Implementierung beschrieben umgesetzt werden:
+	\begin{enumerate}
+		\item \textbf{Die Next-Funktion}, welche wie beschrieben dafür sorgt den billigsten nächsten Knoten zu finden.
+		\item \textbf{Die Previous-Funktion}, welche den billigsten zurückliegenden Knoten liefert. Falls keiner billiger sein sollte, wird der Startknoten selbst ausgegeben.
+		\item \textbf{Finden aller Breakpoints}, also aller Knoten die keinen Knoten hinter sich in Reichweite haben, sodass dieser einen billigeren Preis liefert.
+		\item \textbf{Fahren zum nächsten Knoten}, also das schließliche Weiterfahren, mit Berechnung der Verbrauchs und Berechnung der nachzutankenden Menge.
+	\end{enumerate}
+	Wobei die beschreibenden Formeln in der Beschreibung des Algorithmus zu finden sind.
 \section{Implementierung und Umsetzung der Lösung}
 	Hier könnte Ihr Klassendiagramm stehen.	
 	Entwurf und Struktur der Lösung
