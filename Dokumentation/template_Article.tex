@@ -156,13 +156,16 @@
 \section{Implementierung und Umsetzung der Lösung}
 	Hier könnte Ihr Klassendiagramm stehen.	
 	Entwurf und Struktur der Lösung
-\subsection{Klasse GasStation}
+\subsection{Input-einlesende Klassen}
+	Die folgenden Beschreibungen der Klassen beziehen sich auf die Gruppe der Input-einlesenden Klassen. Sie sorgen für das korrekte der Einlesen der drei verschiedenen Inputfiles.
+\subsubsection{Klasse GasStation}
 	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
 
 	Welche der vielen, vorhandenen Daten benutzen wir überhaupt? Warum können wir den Rest verwerfen?
-\subsection{Klasse Route}
-	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
-\subsection{Klasse PrizeForecast}
+\subsubsection{Klasse Route}
+	Die Klasse Route gehört wie auch die Klasse GasStation zu der Gruppe der Input-einlesenden Klassen. Dabei ist diese Klasse mit dem Lesen der Beispielrouten betreut und bietet daher für diese Aufgabe eine Schnittstelle über welche die Routen verwaltet werden können. Neben einem Konstruktor verfügt sie über eine read-Methode, welche für das eigentliche Einlesen sorgt und dabei die Attribute capacity und route befüllt. Das Attribut speichert dabei alle verfügbaren Daten in einer Liste von Tupeln, wobei diese die jeweilige Zeit, in unserer Schreibweise, die ID und einen Platz für den Preis an der jeweiligen Tankstelle und die tankende Menge enthält. Die Methoden appendPrize und appendAmount fügen Listen von Preisen bzw. Tankmengen mit der richtigen Länge und der richtigen Reihenfolge an diese Plätze ein. \\
+	Abschließend beschreibend für diese Klasse ist die write-Methode, welche die herausgelesene und modifizierte Datenstruktur route wieder in eine Datei schreibt.
+\subsubsection{Klasse PrizeForecast}
 	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
 \subsection{Klasse Supervisor}
 	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
