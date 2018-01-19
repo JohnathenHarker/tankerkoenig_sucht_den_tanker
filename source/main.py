@@ -11,6 +11,7 @@ def main():
     # M = Model()
     # M.train([])
 
+    """
     gasStation = GasStation()
     route = Route("../geg. Dateien/Eingabedaten/Fahrzeugrouten/Bertha Benz Memorial Route.csv")
     strategy = Strategy()
@@ -22,9 +23,9 @@ def main():
     print(strategy.naiveCalculate(route, gasStation))
     print("Finished naiveCalculate")
     print(route.route)
-
-    #S = Supervisor()
-    #S.handleHandle()
+    """
+    S = Supervisor()
+    S.handleHandle()
 
     t2 = time.time()
     print("executed in", t2 - t1, "seconds")

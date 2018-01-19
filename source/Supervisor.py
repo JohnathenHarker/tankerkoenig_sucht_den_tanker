@@ -57,7 +57,7 @@ class Supervisor:
 		- control user
 		"""
 		m = Model()
-		m.train(self.gasStations, 800, 500)
+		m.train(self.gasStations, 700, 500)
 		#for i in [1,2,3,4,5,10,15, 20, 25, 30]:
 		for i in [30]:
 			print(m.forecast(6, 400+i, 4, self.gasStations))

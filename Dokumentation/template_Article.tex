@@ -3,6 +3,11 @@
 \usepackage[utf8]{inputenc}
 \usepackage[scale=0.75,a4paper]{geometry}
 \usepackage[german]{babel}
+
+
+\usepackage{pgfplots} % LaTeX
+
+
 %opening
 \title{InformatiCup - Dokumentation}
 \author{Tilman Hinnerichs, Tobias John}
@@ -43,19 +48,80 @@
 \subsection{Umformung der Preisvorhersagedaten}
 	Die getätigten Annahmen zu den Preisvorhersagedaten sind ähnlichen zu den unter \glqq Umformung der Routendaten\grqq{} getätigten Annahmen. So wird wieder sowohl der Zeitpunkt, welcher als zuletzt bekannt angenommen werden soll, als auch der Zeitpunkt, bis zu welchem die Vorhersage reichen soll, auf die jeweilige Stunde gerundet, um in das oben angerissene Datenmodell zu passen.
 
+
+
 \section{Algorithmenidee}
 \subsection{Lösung der Benzinpreis-Vorhersage-Problems}
 \subsubsection{Ansatz}
 	Welche Algorithmen wurde hier benutzt uns was versprechen wir uns davon? Warum haben wir das ganze in Intervalle unterteilt? Gehen wir auf etwaige Sonderdaten wie in der Aufgabenstellung genannt ein (Schulferien, Adresse,) 
+	
+	\paragraph{Annahmen\\}
+	Unsere Vorhersagemodell beruht auf zwei simplen Annahmen: 
+	\begin{enumerate}
+		\item Die Preise folgen \textbf{sich wiederholenden Mustern}, d.h. die aktuelle Preisentwicklung wird sich fortführen, wie es ähnliche Entwicklungen in der Vergangenheit getan haben. Folgte z.B. in der Vergangenheit auf drei Tage starken Preisstiegs immer ein Abfall, so wird dies in Zukunft auch ähnlich passieren. 
+		\item Tankstellen, die über den Jahresverlauf eine ähnliche Preisentwicklung aufweisen (z.B. wegen gleicher Ferien, d.h. örtlich enger Lage), haben auch im Kleinen (d.h. Tagesverlauf) eine ähnliche Preisentwicklung.
+	\end{enumerate}	
+	Die erste Annahme sollte unbestreitbar sein. Ohne sie wäre ein Vorhersagemodell für Benzinpreise auch nicht möglich. \\
+	Die zweite Annahme ist schon diskussionswürdiger. Es gibt keine mathematische Begründung, warum diese Korrelation bestehen sollte. Jedoch wurde unsere Vorhersage deutlich besser, wenn der Algorithmus so modifiziert wurde, dass er Annahme zwei berücksichtigt.\\
+	Die zweite Annahme beachtend sortiert unser Algorithmus die Tankstellen zunächst Äquivalenzklassen ein. In einer Klasse landen dann sich gegenseitig ähnliche Tankstellen. Für jede der Klassen wird dann ein eigene Vorhersagemodell erstellt, mit dem die Vorhersagen für die entsprechenden Tankstellen durchgeführt werden. 
+	
+	\paragraph{Einteilung in Äquivalenzklassen\\}
+	Die Einteilung in Klassen kann mit Hilfe verschiedener Parameter (z.B. Postleitzahl, Bundesland, Marke,$\ldots$) erfolgen. Diese Kriterien garantieren jedoch mitnichten eine Korrelation der Benzinpreise. Darum entschieden wir uns die Tankstellen \textbf{ausschließlich} mit Hilfe ihrer historischen Benzinpreise zu sortieren. Dies garantiert die Ordnung nach Benzinpreisen. Natürlich werden dabei, dank Schulferien, die Tankstellen automatisch auch nach Lage sortiert. Dementsprechend ist eine Hinzufügung weiterer Daten für unser Vorhersagemodell nicht hilfreich.\\
+	Zunächst formten wir die gegebenen Benzinpreise jeder Tankstelle in einen Vektor um, der die Benzinpreisentwicklung wieder spiegelt. Um die Sortierung zu realisieren, verwendeten wir \textbf{Selforganising-Feature-Maps} (SOFMs). Diese sind ein gut studiertes Werkzeug der Neuroinformatik und eignen sich hervorragend für die Einordnung von hochdimensionalen Vektoren in ähnliche Klassen. Dazu wird ein Netz (hier zweidimensional) von Neuronen durch Training so im hochdimensionalen Werteraum plaziert, dass es möglichst gut die gegebenen Vektoren abbildet. Das Netz passt sich also der Verteilung der gegebenen Vektoren an.\\
+	Nach dem Training kann für jede Tankstelle das Neuron ermittelt werden, welches die kleinste euklidische Distanz zum Vektor der Tankstelle aufweist. Dieses wird als best-matching-Neuron bezeichnet. Tankstellen mit dem selben best-matching-Neuron werden eine Klasse gesteckt. Damit hat diese SOFM unsere Tankstellen in Äquivalenzklassen  eingeteilt. Im nächsten Schritt wurde für jede Klasse ein eigenes Vorhersagemodell entwickelt und angewendet.\\
+	
+	\paragraph{Einzelnes Vorhersagemodell}
+	Obwohl die Menge der zur Verfügung stehenden Trainingsdaten durch die Einteilung in Äquivalenzklassen bereits drastisch reduziert wurde, ist die Datenmenge immer noch gigantisch groß. Darum verwendeten wir auch hier wieder ein neuronales Modell, welches zunächst auf den gegebenen Daten trainiert wurde und anschließend (schnell) für gegebene Daten eine Vorhersage treffen kann. Unser Modell trifft dabei aus dem Preisverlauf der vergangenen Woche eine Vorhersage für den nächsten Tag. Durch iterative Anwendung der Vorhersage kann unser Modell so beliebig weit in der Zukunft die Benzinpreise vorher sagen.\\
+	Da für unsere Anwendung passend, wählten wir wieder SOFMs als Modell aus. \\
+	
+	
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}
+		\begin{axis}[
+			axis x line=bottom,
+			axis y line=center,
+			xtick={0,1,...,8},
+			ytick={-10,-5,...,10},
+			xlabel={Zeit in Tagen},
+			ylabel={Differenz in ct },
+			xlabel style={below right},
+			ylabel style={above left},
+			xmin=0,
+			xmax=9,
+			ymin=-10,
+			ymax=12,
+			domain= 0: 8]
+			
+		%	\addplot coordinates {
+		%
+		%		( 7, 166 )			
+		%	};
+			
+			\addplot{-(x-5)*(x-5)/2+4/2};
+			
+			\addplot{(x-7)*(x-3)*(x)/7};
+			
+			\addplot{(-x+7)/2  };
+		\end{axis}
+		\end{tikzpicture}
+		\caption{Beispielhafter Presiverlauf über acht Tage}
+	\end{figure}
+	
+	- 8 Tage
+	- 7. Tag 23:00 auf 0
+	- zufällige Tage
+	
+	
+	
+	x
 	\newline
 	\newline
 	Wir sollen das ganze an folgenden vergleichbaren Schritten herleiten und erklären:
 	\begin{enumerate}
-		\item \begin{quote}
-			Entscheiden Sie, ob Sie ein Vohersagemodell für alle Tankstellen oder individuelle Vorhersagemodelle für einzelne Tankstellen oder für Klassen von öhnlichen Tankstellen entwickeln wollen. Überlegen Sie sich dazu den möglichen Einfluss von Mermalen einer Tankstelle auf die Entwicklung ihrer Benzinpreise (z.B. Tankstellen an Autobahnen, Tankstellen die vom Berufsverkehr erfasst werden oder Tankstellen in wenig erschlossenen Regionen). Dokumentieren Sie ihre Ergebnisse.
-		\end{quote}
+
 		\item Zusätzliche Informationen?
-		\item Diskutieren der Prognoseergebniss
+		\item Diskutieren der Prognoseergebniss (8GB RAM)
 	\end{enumerate}
 	
 	Und zusätzlich:
@@ -66,13 +132,14 @@
 	Wie haben wir diese Idee umgesetzt? Warum haben wir wie viele Dimensionen an die SOM/SOFM vergeben? Warum halten wir das für sinnvoll?
 \subsubsection{Bewertung der Lösung}
 	Hier könnte Ihr Diagramm stehen. \\
-	Wie gut ist das was wir da gebastelt haben?
+	Wie gut ist das was wir da gebastelt haben?\\
+	Laufzeit  betrachten: Parallelität, Coreanzahl, Server? (mit GPU) --> Forecast dann schnell
 	\begin{quote}
 		Diskutieren Sie die Güte Ihrer erzielten Prognoseergebnisse für den geforederten Vorhersagezeitraum (d.h. bis zu einem Monat in die Zukunft). Verwenden Sie dazu geeignete Maßzahlen für die Güte Ihrer Vorhersagemodelle. 
 	\end{quote}
 \subsection{Lösung des Routenproblems}
 \subsubsection{Ansatz der Lösung}
-	Für die Lösung des Routenproblems wurde der in der Aufgabenstellung beschriebene Algorithmus \glqq To fill or not to fill\glqq{} benutzt. Der Ansatz allein bedarf deswegen keiner weiteren Erläuterung, wobei unsere Umsetzung hingegen erklärenswert ist.\\
+	Für die Lösung des Routenproblems wurde der in der Aufgabenstellung beschriebene Algorithmus \glqq To fill or not to fill"' benutzt. Der Ansatz allein bedarf deswegen keiner weiteren Erläuterung, wobei unsere Umsetzung hingegen erklärenswert ist.\\
 	\textbf{Das sehe ich anders. Es geht sicherlich auch darum, aus dem Paper den Algorithmus herauszulesen, d.h . wissenschaftliche Artikel zu verstehen. Wir sollten kurz zeigen, dass uns das gelungen ist. Außerdem muss hier unbedingt (!!!) noch die Quelle genannt werden.}
 \subsubsection{Umsetzung der Lösung}
 	Das Problem wurde dafür in mehrere Unterprobleme unterteilt, die sich wunderbar in einer Softwarelösung umsetzen lassen. So wurde dieses Problem in die Teilprobleme der Entfernungsberechnung, Preisfindung für eine spezifische Tankstelle auf der Route und den Algorithmus selbst untergliedert. \\

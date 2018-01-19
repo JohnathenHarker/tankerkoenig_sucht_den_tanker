@@ -11,8 +11,8 @@ class GasStation:
 	"""
 
 	def __init__(self):
-
-		#missingData = [5,7,33, 249, 291, 344, 345, 378, 386, 461, 536, 553, 554, 584, 591, 642, 643, 654]
+		
+		self.last_day = 1178 # last day with data
 		self.count = 0	# counts number of gasStations
 		self.prizingTable = []
 		t1 = time.clock()
@@ -29,7 +29,7 @@ class GasStation:
 				nord = float(row[7])
 				sued = float(row[8])
 
-				self.prizingTable.append((id, marke, nord, sued, self.read(1000, id)))
+				self.prizingTable.append((id, marke, nord, sued, self.read(self.last_day, id)))
 				id = id+1
 		# read historic data
 
