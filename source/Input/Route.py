@@ -88,7 +88,7 @@ class Route:
 				else:
 					readlines.append(line)
 
-		with open(file, "w") as f:
+		with open(file + "mitTankstrategie", "w") as f:
 			counter = 0
 			for line in readlines:
 				f.write(line + ";" + str(self.route[counter][2]) + ";" + str(self.route[counter][3]))
