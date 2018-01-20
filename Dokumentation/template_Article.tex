@@ -112,31 +112,29 @@
 	
 	\paragraph{Preisvorhersage\\}
 	Eine einzelne Preisvorhersage läuft (nach erfolgten Training der SOFMs) wie folgt ab: Zunächst ermittelt man die Äquivalenzklasse in der sich die Tankstelle befindet. Dies ist ein triviales Ergebnis der Sortierung der Tankstellen in Gruppen. Dadurch erhält man die SOFM, die für diese Tankstelle trainiert wurde.\\
-	Im nächsten Schritt benötigen wir die letzte Woche an bekannten Bezinpreisdaten. Sind die dabei gegebenen Daten z.B. bis 11:00 Uhr verfügbar, so werden nur die Daten bis 00:00 Uhr dieses Tages betrachtet. Nachdem der letzte gegebene Wert (siebter Tag 00:00 Uhr) von allen Preisen der Datenfolge abgezogen wurde, ist unser Datensatz in einer Form wie diejenigen, die von unserer SOFM sortiert wurden (siehe Abbildung \ref{Diagramm Daten}), nur das natürlich nur die ersten sieben Tage mit Daten gegeben sind. Aus den trainierten Neuronen der SOFM wählen wir nun das jenige aus, dessen Gewichtsvektor in den ersten sieben Tagen am nächsten an unserem soeben erzeugten Datensatz liegt. Wir verwenden dazu ganz klassisch die euklidische Distanz. Unsere Preisvorhersage für den nächsten Tag ist dann der weitere Verlauf des Preises in diesem Neuron. D.h. wir wählen den Preisverlauf der am ehesten zum gegebenen passt und nehmen an, dass sich unser Preis ebenso weiter entwickeln wird wie dessen Preis.\\
-	
-	
-	
-	
-	x
-	\newline
-	\newline
-	Wir sollen das ganze an folgenden vergleichbaren Schritten herleiten und erklären:
-	\begin{enumerate}
+	Im nächsten Schritt benötigen wir die letzte Woche an bekannten Bezinpreisdaten. Sind die dabei gegebenen Daten z.B. bis 11:00 Uhr verfügbar, so werden nur die Daten bis 00:00 Uhr dieses Tages betrachtet. Nachdem der letzte gegebene Wert (siebter Tag 00:00 Uhr) von allen Preisen der Datenfolge abgezogen wurde, ist unser Datensatz in einer Form wie diejenigen, die von unserer SOFM sortiert wurden (siehe Abbildung \ref{Diagramm Daten}), nur das natürlich nur die ersten sieben Tage mit Daten gegeben sind. Aus den trainierten Neuronen der SOFM wählen wir nun das jenige aus, dessen Gewichtsvektor in den ersten sieben Tagen am nächsten an unserem soeben erzeugten Datensatz liegt. Wir verwenden dazu ganz klassisch die euklidische Distanz. Unsere Preisvorhersage für den nächsten Tag ist dann der weitere Verlauf des Preises in diesem Neuron. D.h. wir wählen den Preisverlauf der am ehesten zum gegebenen passt und nehmen an, dass sich unser Preis ebenso weiter entwickeln wird wie dessen Preis. Zum Schluss muss natürlich der ursprüngliche Aabgezogene Preis vom siebten Tag 23:00 wieder hinzuaddiert werden.\\
+	Falls wir Vorhersagen mehr als nur einen Tag in die Zukunft treffen wollen, so führen wir das beschriebenen Verfahren entsprechend oft hinter einander aus. D.h. mit Hilfe der Vorhersage für den ersten Tag kann der Preis analog für den zweit Tag und daraus für den dritten Tag etc. berechnet werden. Da eine SOFM dazu neigt auch extreme Datensätze zu repräsentieren "'dämpfen"` wir mit voran schreiten dieser Kette ein wenig die Differenzen am achten Tag. Dadurch werden z.B. sich selbst immer weiter verstärkende ansteigende Preise vermieden. Der Faktor ist aber immer noch so gering, dass er den eigentlichen Verlauf nicht zu sehr verfälscht.
 
-		\item Zusätzliche Informationen?
-		\item Diskutieren der Prognoseergebniss (8GB RAM)
-	\end{enumerate}
-	
-	Und zusätzlich:
-	\begin{quote}
-		Überlegen Sie im nächsten Schritt, welche zusätzlichen Informationen wie zum Beispiel die Wochentage, Ferienzeiten oder Verkehrsinformationen für Ihre Benzinpreisvorhersagen sinnvoll sein könnten. Erweitern Sie Ihre Vorhersagemodelle entsprechend und dokumentieren Sie Ihre Ergebnisse.
-	\end{quote}
 \subsubsection{Umsetzung der Lösung}
-	Wie haben wir diese Idee umgesetzt? Warum haben wir wie viele Dimensionen an die SOM/SOFM vergeben? Warum halten wir das für sinnvoll?
+	Für die beiden SOFMs gibt es eine Vielzahl an Parametern, mit denen das Verhalten beeinflusst werden kann. Wir beschränken uns hier auf die wichtigsten und begründen unsere Wahl.
+	\paragraph{SOFM für Äquivalenzklassen\\}
+	Der wichtigst Prameter war hier die \textbf{Größe des Neuronennetzes} $(dim_{rough} \times dim_{rough})$. Ja größer es wird, desto spezifischer können die Tankstellen zugeordnet werden. Allerdings müssen dann auch mehr SOFMs im zweiten Schritt trainiert werden, was zu linear steigender Zeit führt. Wir entschieden uns daher für ein $4 \times 4$ Gitter an Neuronen. Dies war ein guter Mittelweg zwischen Geschwindigkeit und Vorhersagungsgüte.\\
+	Die \textbf{Größe des Vektors}$(input\_dim_{rough})$, der eine Tankstelle repräsentiert ist ebenfalls sehr entscheidend, da die Laufzeit des Trainings direkt linear davon abhängt. Wir entschieden uns für ein Jahr an Daten, jeweils ein Preis pro Tag. Dadurch sind die Vektoren 365-dimensional und dies war für uns die Grenze, was mit unserer Hardware in vernünftiger Rechenzeit möglich war. Eine höhere Dimension, also mehr Werte, würde auch hier die Vorhersage verbessern.\\
+	Der die letzten entscheidenden Parameter ist die \textbf{Anzahl der Trainingsdaten} $(data_{rough})$ und die \textbf{Anzahl der Trainingsrunden}$(rounds_{rough})$. Beide gehen linear in die Laufzeit ein. Wir entschieden uns alle Tankstellen zum Training zu verwenden und lediglich 20 Trainingsrunden durchzuführen. Dies erscheint evtl. etwas niedrig, reicht aber auch um dieses kleine Netz bei der großen Anzahl an Trainingsdaten zu trainieren.\\
+	Die SOFM wird mit Daten zufällig ausgewählter Tankstellen initialisiert. Die Lernparameter für das Training sind von untergeordneter Rolle. Sie wurden so gewählt, dass die Tankstellen möglichst gleichmäßig in Klassen eingeteilt werden.\\
+	Die Gesamtlaufzeit $Train_{rough}$ lässt sich wie folgt abschätzen:
+	\[ Train_{rough} \in \Theta \left( rounds_{rough} \cdot data_{rough} \cdot \left( {dim_{rough}}^2 \cdot input\_dim_{rough} \right) \right) \]
+	
+	\paragraph{SOFM für einzelnes Vorhersagemodell\\}
+	Die wichtigsten Parameter sind hier die gleichen wie bei der SOFM zur Bildung von Äquivalenzklassen:\\
+	
+	
+	
 \subsubsection{Bewertung der Lösung}
 	Hier könnte Ihr Diagramm stehen. \\
 	Wie gut ist das was wir da gebastelt haben?\\
-	Laufzeit  betrachten: Parallelität, Coreanzahl, Server? (mit GPU) --> Forecast dann schnell
+	Laufzeit  betrachten: Parallelität, Coreanzahl, Server? (mit GPU) --> Forecast dann schnell\\
+	8GB RAM
 	\begin{quote}
 		Diskutieren Sie die Güte Ihrer erzielten Prognoseergebnisse für den geforederten Vorhersagezeitraum (d.h. bis zu einem Monat in die Zukunft). Verwenden Sie dazu geeignete Maßzahlen für die Güte Ihrer Vorhersagemodelle. 
 	\end{quote}
