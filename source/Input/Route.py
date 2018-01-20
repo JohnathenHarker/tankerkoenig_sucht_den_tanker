@@ -9,10 +9,9 @@ class Route:
 	def __init__(self):
 		# inputs file instantly
 		print("input route")
-		#route is a tuple of capacity and the list of tuples of arrival time, id, prize and amount of a certain gas station
+		#route is a tuple of the list of tuples of arrival time, id, prize and amount of a certain gas station
 		self.capacity = 0
 		self.route = []
-		print("route", self.route)
 
 	def read(self, file):
 		"""
@@ -82,14 +81,16 @@ class Route:
 		readlines = []
 		with open(file, "r", encoding='utf-8') as f:
 			first_line = True
-			for line in file:
+			for line in f:
 				if first_line:
 					first_line = False
 				else:
 					readlines.append(line)
 
-		with open(file + "mitTankstrategie", "w") as f:
+		with open(file[:-4] + "mitTankstrategie", "w") as f:
 			counter = 0
 			for line in readlines:
-				f.write(line + ";" + str(self.route[counter][2]) + ";" + str(self.route[counter][3]))
+				print("counter", counter, len(self.route))
+				print("inner", len(self.route[counter]))
+				f.write(line + ";" + str(self.route[counter][2]) + ";" + str(self.route[counter][3])+"\n")
 				counter += 1

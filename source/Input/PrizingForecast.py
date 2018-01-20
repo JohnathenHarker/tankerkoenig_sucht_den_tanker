@@ -5,10 +5,9 @@ class PrizingForecast:
 	handles files with prize requests
 	"""
 
-	def __init__(self, file):
+	def __init__(self):
 		#contains a list of tuples consisting of endDate, forecastDate and the gas station id
 		self.forecastParameter = []
-		self.read(file)
 
 	def read(self, file):
 		"""
