@@ -4,7 +4,7 @@
 \usepackage[scale=0.75,a4paper]{geometry}
 \usepackage[german]{babel}
 
-
+\usepackage{hyperref}
 \usepackage{pgfplots} % LaTeX
 
 
@@ -67,12 +67,12 @@
 	
 	\paragraph{Einteilung in Äquivalenzklassen\\}
 	Die Einteilung in Klassen kann mit Hilfe verschiedener Parameter (z.B. Postleitzahl, Bundesland, Marke,$\ldots$) erfolgen. Diese Kriterien garantieren jedoch mitnichten eine Korrelation der Benzinpreise. Darum entschieden wir uns die Tankstellen \textbf{ausschließlich} mit Hilfe ihrer historischen Benzinpreise zu sortieren. Dies garantiert die Ordnung nach Benzinpreisen. Natürlich werden dabei, dank Schulferien, die Tankstellen automatisch auch nach Lage sortiert. Dementsprechend ist eine Hinzufügung weiterer Daten für unser Vorhersagemodell nicht hilfreich.\\
-	Zunächst formten wir die gegebenen Benzinpreise jeder Tankstelle in einen Vektor um, der die Benzinpreisentwicklung wieder spiegelt. Um die Sortierung zu realisieren, verwendeten wir \textbf{Selforganising-Feature-Maps} (SOFMs). Diese sind ein gut studiertes Werkzeug der Neuroinformatik und eignen sich hervorragend für die Einordnung von hochdimensionalen Vektoren in ähnliche Klassen. Dazu wird ein Netz (hier zweidimensional) von Neuronen durch Training so im hochdimensionalen Werteraum plaziert, dass es möglichst gut die gegebenen Vektoren abbildet. Das Netz passt sich also der Verteilung der gegebenen Vektoren an.\\
+	Zunächst formten wir die gegebenen Benzinpreise jeder Tankstelle in einen Vektor um, der die Benzinpreisentwicklung wieder spiegelt. Um die Sortierung zu realisieren, verwendeten wir \textbf{Selforganising-Feature-Maps} (SOFMs). Diese sind ein gut studiertes Werkzeug der Neuroinformatik und eignen sich hervorragend für die Einordnung von hochdimensionalen Vektoren in ähnliche Klassen. Dazu wird ein Netz (hier zweidimensional) von Neuronen durch Training so im hochdimensionalen Werteraum plaziert, dass es möglichst gut die gegebenen Vektoren abbildet. Das Netz passt sich also der Verteilung der gegebenen Vektoren an. (Für eine detailliertere Beschreibung des Algorithmus siehe \cite{SOFM})\\
 	Nach dem Training kann für jede Tankstelle das Neuron ermittelt werden, welches die kleinste euklidische Distanz zum Vektor der Tankstelle aufweist. Dieses wird als best-matching-Neuron bezeichnet. Tankstellen mit dem selben best-matching-Neuron werden eine Klasse gesteckt. Damit hat diese SOFM unsere Tankstellen in Äquivalenzklassen  eingeteilt. Im nächsten Schritt wurde für jede Klasse ein eigenes Vorhersagemodell entwickelt und angewendet.\\
 	
-	\paragraph{Einzelnes Vorhersagemodell}
+	\paragraph{Einzelnes Vorhersagemodell\\}
 	Obwohl die Menge der zur Verfügung stehenden Trainingsdaten durch die Einteilung in Äquivalenzklassen bereits drastisch reduziert wurde, ist die Datenmenge immer noch gigantisch groß. Darum verwendeten wir auch hier wieder ein neuronales Modell, welches zunächst auf den gegebenen Daten trainiert wurde und anschließend (schnell) für gegebene Daten eine Vorhersage treffen kann. Unser Modell trifft dabei aus dem Preisverlauf der vergangenen Woche eine Vorhersage für den nächsten Tag. Durch iterative Anwendung der Vorhersage kann unser Modell so beliebig weit in der Zukunft die Benzinpreise vorher sagen.\\
-	Da für unsere Anwendung passend, wählten wir wieder SOFMs als Modell aus. \\
+	Da für unsere Anwendung passend, wählten wir wieder SOFMs als Modell aus. 
 	
 	
 	\begin{figure}
@@ -85,18 +85,14 @@
 			ytick={-10,-5,...,10},
 			xlabel={Zeit in Tagen},
 			ylabel={Differenz in ct },
-			xlabel style={below right},
-			ylabel style={above left},
+			xlabel style={below },
+			ylabel style={above },
 			xmin=0,
 			xmax=9,
 			ymin=-10,
 			ymax=12,
 			domain= 0: 8]
-			
-		%	\addplot coordinates {
-		%
-		%		( 7, 166 )			
-		%	};
+
 			
 			\addplot{-(x-5)*(x-5)/2+4/2};
 			
@@ -106,11 +102,16 @@
 		\end{axis}
 		\end{tikzpicture}
 		\caption{Beispielhafter Presiverlauf über acht Tage}
+		\label{Diagramm Daten}
 	\end{figure}
 	
-	- 8 Tage
-	- 7. Tag 23:00 auf 0
-	- zufällige Tage
+	Die zentrale Entscheidung war nun, wie die gegebenen Benzinpreise vorverarbeitet werden müssen, so dass sie von der SOFM benutzt werden können. Wir entschieden uns mit der SOFM acht Tage an Benzinpreisen zu verarbeiten, mit je einem Wert pro Stunde. Dies ergibt 192-dimensionale Vektoren. Der erste Preis ist auch an einem Tag um 00:00 Uhr entnommen worden, d.h. die Datensätze beginnen immer mit einem Tagesbeginn. Dies hat den Vorteil, dass das Netz Preisverläufe im Tagesverlauf besser abschätzen kann.\\
+	Da uns nur die Entwicklung, nicht aber die Höhe des Preises interessiert, wird von allen Datenpunkten der Preis des siebten Tages 23:00 Uhr abgezogen. Dieser Wert ist damit in allen Datensätzen die verarbeitet werden null. Damit ist es möglich auch Preisevorhersagen zu treffen, obwohl die entsprechenden Preise noch nicht vor kamen. D.h. ein heute trainiertes Modell kann auch in ferner Zukunft aus einer Woche an gegebenen Daten mit beliebig hohen Benzinpreisen eine Vorhersage berechnen. Wir benötigen für eine Vorhersage (nach Training der SOFM) also nicht die (halbwegs) aktuellen Daten aller Tankstellen, sondern es reicht uns ein winziger Bruchteil an aktuellen Daten der einzelnen Tankstelle, um ihre Preise vorherzusagen. Das bedeutet auch, dass eine einzelne Vorhersage sehr schnell ausgewertet werden kann.\\
+	In Abbildung \ref{Diagramm Daten} sind beispielhaft drei Datensätze dargestellt, mit denen unsere SOFM trainiert werden könnte. Man sieht deutlich, dass sie einen Punkt am Ende des siebten Tages mit dem Funktionswert null gemeinsam haben. \\
+	Um die SOFM zu trainieren, benötigen wir Trainingsdaten, an denen sich die Neuronen dann ausrichten. Dafür wählen wir aus den historischen Daten der Tankstellen zufällige Datenabschnitte aus. Bei hinreichend großer Anzahl an Datenabschnitten entsteht so ein Datensatz der repräsentativ für die verschiedenen Benzinpreisverläufe ist.\\
+	
+	\paragraph{Preisvorhersage\\}
+	
 	
 	
 	
@@ -181,4 +182,12 @@
 		... Ausblick: Lässt sich Ihr Verfahren vielleicht auf auf Ladevorgänge in der Elektromobilität oder für ganz andere Aufgabenstellungen anwenden?
 	\end{quote}
 	
+	\begin{thebibliography}{999}
+		\bibitem {SOFM} Wikipedia, Die freie Enzyklopädie (Hrsg.): Selbstorganisierende Karte; \url{https://de.wikipedia.org/w/index.php?title=Selbstorganisierende_Karte&oldid=172760713}, Zugriff 20.01.2018
+		\bibitem {neupy} Yurii Shevchuk: NeuPy Home; \url{http://neupy.com/pages/home.html}, Zugriff 20.01.2018
+		\bibitem{routefinding} S. Khuller, A. Malekian und J. án Mestre: Fill or not to Fill: The Gas Station Problem; \url{http://www.cs.umd.edu/projects/gas/gas-station.pdf},  Zugriff 20.01.2018
+	\end{thebibliography}
+	
 \end{document}
+
+
