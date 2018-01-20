@@ -104,6 +104,7 @@ class Supervisor:
 		"""
 		m = Model()
 		m.train(self.gasStation, 700, 500)
+
 		#for i in [1,2,3,4,5,10,15, 20, 25, 30]:
 		for i in [30]:
 			print(m.forecast(6, 400+i, 4, self.gasStation))
