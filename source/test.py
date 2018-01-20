@@ -9,27 +9,30 @@ def main():
     # M = Model()
     # M.train([])
 
-    """
     gasStation = GasStation()
-    route = Route("../geg. Dateien/Eingabedaten/Fahrzeugrouten/Bertha Benz Memorial Route.csv")
-    strategy = Strategy()
+    route = Route()
+    route.read("../geg. Dateien/Eingabedaten/Fahrzeugrouten/Bertha Benz Memorial Route.csv")
+    strategy = Strategy(gasStation)
     L = [1] * 31
     route.appendPrize(L)
     print(route.route)
     t = time.clock()
-    print("Executing naiveCalculate")
-    print(strategy.naiveCalculate(route, gasStation))
+    print("Starting calculation")
+    print(strategy.calculate(route))
+    route.write("../geg. Dateien/Eingabedaten/Fahrzeugrouten/Bertha Benz Memorial Route.csv")
+    print("Finished calculation")
+
+    print("Starting naiveCalculate")
+    print(strategy.naiveCalculate(route))
     print("Finished naiveCalculate")
     print(route.route)
-    """
 
-    gasStation = GasStation()
-    route = Route()
-    strategy = Strategy()
+    strategy = Strategy(gasStation)
 
+    print("Starting to find gasStations next to 1")
     activeID = 1
     nearToActiveID = []
-    for station in range(15000):
+    for station in range(1, 15000):
         route.capacity = 1
         route.route = [(100, activeID, 0, 0), (101, station, 0, 0)]
         strategy.route = route.route
