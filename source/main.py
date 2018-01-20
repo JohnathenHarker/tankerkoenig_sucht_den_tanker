@@ -13,7 +13,8 @@ def main():
 
     """
     gasStation = GasStation()
-    route = Route("../geg. Dateien/Eingabedaten/Fahrzeugrouten/Bertha Benz Memorial Route.csv")
+    route = Route()
+    route.read("../geg. Dateien/Eingabedaten/Fahrzeugrouten/Bertha Benz Memorial Route.csv")
     strategy = Strategy()
     L = [1] * 31
     route.appendPrize(L)
