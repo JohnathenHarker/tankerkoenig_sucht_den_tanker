@@ -87,10 +87,8 @@ class Route:
 				else:
 					readlines.append(line)
 
-		with open(file[:-4] + "mitTankstrategie", "w") as f:
+		with open(file[:-4] + "_mit_Tankstrategie.csv", "w") as f:
 			counter = 0
 			for line in readlines:
-				print("counter", counter, len(self.route))
-				print("inner", len(self.route[counter]))
-				f.write(line + ";" + str(self.route[counter][2]) + ";" + str(self.route[counter][3])+"\n")
+				f.write(line[:-1] + ";" + str(self.route[counter][2]) + ";" + str(self.route[counter][3])+"\n")
 				counter += 1
