@@ -1,0 +1,5 @@
+#lines starting with # will be ignored
+#write your commands as the following
+#type of handle can be forecast or route
+#file has to be the relative path to the file which should be valid
+route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Bertha Benz Memorial Route.csv
