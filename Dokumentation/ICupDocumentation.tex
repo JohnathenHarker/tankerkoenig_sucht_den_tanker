@@ -118,6 +118,7 @@
 	Falls wir Vorhersagen mehr als nur einen Tag in die Zukunft treffen wollen, so führen wir das beschriebenen Verfahren entsprechend oft hinter einander aus. D.h. mit Hilfe der Vorhersage für den ersten Tag kann der Preis analog für den zweit Tag und daraus für den dritten Tag etc. berechnet werden. Da eine SOFM dazu neigt auch extreme Datensätze zu repräsentieren "`dämpfen"' wir mit voran schreiten dieser Kette ein wenig die Differenzen am achten Tag. Dadurch werden z.B. sich selbst immer weiter verstärkende ansteigende Preise vermieden. Der Faktor ist aber immer noch so gering, dass er den eigentlichen Verlauf nicht zu sehr verfälscht.
 
 \subsubsection{Umsetzung der Lösung}
+	Da die eigene Implementierung von SOFMs zeitaufwendig und im Ergebnis vermutlich weniger performant ist, haben wir für die SOFMs die Bibliothek \textit{neupy} verwendet (siehe \cite{neupy}).\\
 	Für die beiden SOFMs gibt es eine Vielzahl an Parametern, mit denen das Verhalten beeinflusst werden kann. Wir beschränken uns hier auf die wichtigsten und begründen unsere Wahl.
 	\paragraph{SOFM für Äquivalenzklassen\\}
 	Der wichtigst Prameter war hier die \textbf{Größe des Neuronennetzes} $(dim_{rough} \times dim_{rough})$. Ja größer es wird, desto spezifischer können die Tankstellen zugeordnet werden. Allerdings müssen dann auch mehr SOFMs im zweiten Schritt trainiert werden, was zu linear steigender Zeit führt. Wir entschieden uns daher für ein $4 \times 4$ Gitter an Neuronen. Dies war ein guter Mittelweg zwischen Geschwindigkeit und Vorhersagungsgüte.\\
@@ -160,7 +161,7 @@
 		xtick={1,5,10,...,30},
 		ytick={20,40,...,80},
 		xlabel={Zeit in Tagen},
-		ylabel={Abweichung in zehntel-ct },
+		ylabel={Abweichung in Zehntel-ct },
 		xlabel style={below },
 		ylabel style={above },
 		xmin=0,
@@ -187,6 +188,7 @@
 
 	
 	\paragraph{Potential der Lösung\\}
+	\label{potential}
 	Unsere Lösung bietet einige Vorteile, die sie sehr gut für den praktischen Einsatz eignet. Die Lösung ist dabei vor allem für den Einsatz mit einer Client-Server-Architektur zugeschnitten:
 	Laufzeitverbesserungen lassen sich zunächst durch \textbf{massive Parallelität} erreichen. SOFMs können hervorragend parallel, vor allem auf GPUs, berechnet werden. Durch diesen Geschwindigkeitsgewinn können die SOFMs natürlich größer werden und bessere Vorhersagen liefern.\\
 	Ein weiterer riesiger Vorteil ist, dass die SOFMs mit der Zeit "nachtrainiert" werden können, und man so Zeit sparen kann: So könnte man die SOFMs einmal zeitaufwendig trainieren und danach z.B. einmal täglich die SOFMs anpassen, d.h. man verwendet aktuelle Benzindaten, um die SOFM weiter zu trainieren. Dabei startet man mit den bereits gelernten Gewichten. Die Adaption der Neuronen an die aktuellen Daten geschieht nun wesentlich schneller, da die Neuronen schon ziemlich genau da platziert sind, wo sie auch nach dem Training sein werden. D.h. über die Zeit müssen sich die SOFMs nur einmal täglich ganz leicht (und dementsprechend schnell) adaptieren, um immer mit aktuellen Daten trainiert zu sein.\\
@@ -220,26 +222,23 @@
 
 	Welche der vielen, vorhandenen Daten benutzen wir überhaupt? Warum können wir den Rest verwerfen?
 \subsubsection{Klasse Route}
-	Die Klasse Route gehört wie auch die Klasse GasStation zu der Gruppe der Input-einlesenden Klassen. Dabei ist diese Klasse mit dem Lesen der Beispielrouten betreut und bietet daher für diese Aufgabe eine Schnittstelle über welche die Routen verwaltet werden können. Neben einem Konstruktor verfügt sie über eine read-Methode, welche für das eigentliche Einlesen sorgt und dabei die Attribute capacity und route befüllt. Das Attribut speichert dabei alle verfügbaren Daten in einer Liste von Tupeln, wobei diese die jeweilige Zeit, in unserer Schreibweise, die ID und einen Platz für den Preis an der jeweiligen Tankstelle und die tankende Menge enthält. Die Methoden appendPrize und appendAmount fügen Listen von Preisen bzw. Tankmengen mit der richtigen Länge und der richtigen Reihenfolge an diese Plätze ein. \\
-	Abschließend beschreibend für diese Klasse ist die write-Methode, welche die herausgelesene und modifizierte Datenstruktur route wieder in eine Datei schreibt.
+	Die Klasse \textit{Route} gehört wie auch die Klasse \textit{GasStation} zu der Gruppe der Input-einlesenden Klassen. Dabei ist diese Klasse mit dem Lesen der Beispielrouten betreut und bietet daher für diese Aufgabe eine Schnittstelle über welche die Routen verwaltet werden können. Neben einem Konstruktor verfügt sie über eine \textit{read}-Methode, welche für das eigentliche Einlesen sorgt und dabei die Attribute \textit{capacity} und \textit{route} befüllt. Das Attribut speichert dabei alle verfügbaren Daten in einer Liste von Tupeln, wobei diese die jeweilige Zeit, in unserer Schreibweise, die ID und einen Platz für den Preis an der jeweiligen Tankstelle und die tankende Menge enthält. Die Methoden \textit{appendPrize} und \textit{appendAmount} fügen Listen von Preisen bzw. Tankmengen mit der richtigen Länge und der richtigen Reihenfolge an diese Plätze ein. \\
+	Abschließend beschreibend für diese Klasse ist die \textit{write}-Methode, welche die herausgelesene und modifizierte Datenstruktur \textit{route} wieder in eine Datei schreibt.
 \subsubsection{Klasse PrizeForecast}
 	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
 \subsection{Klasse Supervisor}
 	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
 \subsection{Klasse Model}
-	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
+	Diese Klasse bildet den Kern unserer Preisvorhersagung. Ein Modell kann über den Konstruktor erstellt und anschließend mit der Methode \textit{train} trainiert werden. Diese ruft zunächst \textit{trainRough} auf, um die Tankstellen in Äquivalenzklassen einzuordnen und danach werden wird für jede SOFM die Methode \textit{trainSOFM} aufgerufen. Diese aufrufe geschehen entweder sequenziell oder parallel. Standardmäßig wird parallel trainiert mit der Methode \textit{trainFineParallel}.\\
+	Nachdem das Modell trainiert wurde kann mit Hilfe der Methode \textit{forecast} der Preis für einen Zeitpunkt in der Zukunft vorhergesagt werden. Die Methode ruft dazu mehrfach \textit{simpleForecast} auf, welche die Preise des nächsten Tages voraussagt.\\
+	Des weiteren verfügt die Klasse über eine \textit{evaluate}-Methode. Diese wurde verwendet, um die Güte der Vorhersagen enzuschätzen (siehe Abbildung \ref{Median})
 \subsection{Klasse Strategy}
 	Welche Aufgaben hat die Klasse zu erfüllen? Was sind die wichtigsten Funktionen und was tun diese? Wie werden die Datenstrukturen befüllt und warum auf diese Weise?
 
-\section{Ausblick und Erweiterungen}
-	InformatiCup sagt, dass man tolle Erweiterungen einfügen könnte. Ein kleiner Auszug: 
-	\begin{quote}
-		Falls nach der erfolgreichen Implementierung der Grundanforderungen noch Zeit für Erweiterungen bleibt, seien Sie kreativ, zum Beispiel mit einer mobilen App für echte Benzinpreisvorhersagen unterwegs. Oder passen Sie Ihre Softwareanwendung für die Ausführung in der Cloud für eine hohe Performanz, Skalierbarkeit und Verfügbarkeit an. Sie möchten nicht mit einem durchschnittlichen Kraftstoffverbrauch rechnen? Integrieren sie mögliche Spezialsoftware für die Simulation des Benzinverbrauchs. Oder verwenden Sie Daten aus Online-Kalendern als Grundlage für Ihre Fahrzeugrouten. Seien Sie kreativ!
-	\end{quote}
-	Uns weiterhin:
-	\begin{quote}
-		... Ausblick: Lässt sich Ihr Verfahren vielleicht auf auf Ladevorgänge in der Elektromobilität oder für ganz andere Aufgabenstellungen anwenden?
-	\end{quote}
+\section{Ausblick}
+	Das beschriebene Verfahren eignet sich gut, um Benzinpreise vorher zu sagen. Daher lässt es sich natürlich auch genau so auf die Preise für andere Kraftstoffe wie Diesel oder Erdgas übertragen. Für Elektroautos hingegen ist diese Software nicht geeignet: Zum einen schwankt der Strompreis bei weitem nicht so stark wie der Preis für Mineralöl. Solch eine Vorhersage ist also gar nicht notwendig, da die Preise an allen Ladesäulen sehr gleich sind. Des weiteren benötigt das Laden eines Elektroautos wesentlich mehr Zeit als das Tanken eines herkömmlichen Autos. Die Annahme, dass das Tanken also gar keine Zeit verbraucht ist damit hinfällig und die Zeitpunkten wann wir die Tankstellen erreichen passen nicht zur Realität.\\
+	Erweiterungen und Verbesserungen der Software wurden auf Seite \pageref{potential} diskutiert.
+	
 	
 	\begin{thebibliography}{999}
 		\bibitem {SOFM} Wikipedia, Die freie Enzyklopädie (Hrsg.): Selbstorganisierende Karte; \url{https://de.wikipedia.org/w/index.php?title=Selbstorganisierende_Karte&oldid=172760713}, Zugriff 20.01.2018
