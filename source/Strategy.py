@@ -7,13 +7,13 @@ class Strategy:
 	calculates the optimal fueling strategy for path with known prizes
 	formerly known as tFontF
 	"""
-	def __init__(self):
+	def __init__(self, gasStation):
 		self.capacity = 0
 		self.route = []
 		self.bestRoute = []
-		self.gasStation = None
+		self.gasStation = gasStation
 
-	def calculate(self, route, gasStation):
+	def calculate(self, route):
 		"""
 		- compute best strategy for fueling and return it
 		"""
@@ -22,7 +22,6 @@ class Strategy:
 
 		self.capacity = route.capacity
 		self.route = route.route
-		self.gasStation = gasStation
 		self.bestRoute = [0] * len(self.route)
 
 		self.driveToNext(0, self.findNextBreakpoint(0), 0)
@@ -37,7 +36,7 @@ class Strategy:
 
 		return prize
 
-	def naiveCalculate(self, route, gasStation):
+	def naiveCalculate(self, route):
 		"""
 		Calculates the prize for a naive way of refilling. Always refills to full capacity
 		:param route:
@@ -47,19 +46,15 @@ class Strategy:
 
 		self.capacity = route.capacity
 		self.route = route.route
-		self.gasStation = gasStation
 
 		self.naiveRoute = [0] * len(self.route)
 
 		prize = 0
 		currentGas = 0
 		for currentNode in range(len(self.naiveRoute)-1):
-			print("CurrentNode:", currentNode, "CurrentGas:", currentGas)
 			fillingValue = self.capacity - currentGas
-			print("fillingValue:", fillingValue)
 			self.naiveRoute[currentNode] = fillingValue
 			currentGas = self.capacity
-			print("Prize for current node:", self.prize(currentNode))
 			prize += fillingValue * self.prize(currentNode)
 
 			currentGas = currentGas - self.consumption(currentNode, currentNode+1)
@@ -107,7 +102,7 @@ class Strategy:
 			return 0
 		return int(self.route[position][2])
 
-	def findBreakPoints(self):
+	def findBreakpoints(self):
 		returnList = []
 
 		for node in range(1, len(self.route)):
@@ -125,7 +120,7 @@ class Strategy:
 		if currentNode == len(self.route)-1:
 			return currentNode
 
-		for node in self.findBreakPoints():
+		for node in self.findBreakpoints():
 			if node > currentNode:
 				return node
 
@@ -169,5 +164,4 @@ class Strategy:
 			dist = distance(getIDfromPosInRoute(currentNode), getIDfromPosInRoute(currentNode+1))
 			consumptionPerKilometer = 5.6 /100.0
 			consumptionToNext = 1.0 * dist * consumptionPerKilometer
-			print("consumption:", currentNode, targetNode, consumptionToNext)
 			return consumptionToNext + self.consumption(currentNode+1, targetNode)
