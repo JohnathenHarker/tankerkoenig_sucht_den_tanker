@@ -111,6 +111,8 @@
 	Um die SOFM zu trainieren, benötigen wir Trainingsdaten, an denen sich die Neuronen dann ausrichten. Dafür wählen wir aus den historischen Daten der Tankstellen zufällige Datenabschnitte aus. Bei hinreichend großer Anzahl an Datenabschnitten entsteht so ein Datensatz der repräsentativ für die verschiedenen Benzinpreisverläufe ist.\\
 	
 	\paragraph{Preisvorhersage\\}
+	Eine einzelne Preisvorhersage läuft (nach erfolgten Training der SOFMs) wie folgt ab: Zunächst ermittelt man die Äquivalenzklasse in der sich die Tankstelle befindet. Dies ist ein triviales Ergebnis der Sortierung der Tankstellen in Gruppen. Dadurch erhält man die SOFM, die für diese Tankstelle trainiert wurde.\\
+	Im nächsten Schritt benötigen wir die letzte Woche an bekannten Bezinpreisdaten. Sind die dabei gegebenen Daten z.B. bis 11:00 Uhr verfügbar, so werden nur die Daten bis 00:00 Uhr dieses Tages betrachtet. Nachdem der letzte gegebene Wert (siebter Tag 00:00 Uhr) von allen Preisen der Datenfolge abgezogen wurde, ist unser Datensatz in einer Form wie diejenigen, die von unserer SOFM sortiert wurden (siehe Abbildung \ref{Diagramm Daten}), nur das natürlich nur die ersten sieben Tage mit Daten gegeben sind. Aus den trainierten Neuronen der SOFM wählen wir nun das jenige aus, dessen Gewichtsvektor in den ersten sieben Tagen am nächsten an unserem soeben erzeugten Datensatz liegt. Wir verwenden dazu ganz klassisch die euklidische Distanz. Unsere Preisvorhersage für den nächsten Tag ist dann der weitere Verlauf des Preises in diesem Neuron. D.h. wir wählen den Preisverlauf der am ehesten zum gegebenen passt und nehmen an, dass sich unser Preis ebenso weiter entwickeln wird wie dessen Preis.\\
 	
 	
 	
