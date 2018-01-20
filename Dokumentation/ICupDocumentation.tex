@@ -3,7 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[scale=0.75,a4paper]{geometry}
 \usepackage[german]{babel}
-
+\usepackage{verbatim}
 \usepackage{hyperref}
 \usepackage{pgfplots} % LaTeX
 
@@ -79,6 +79,8 @@
 		\centering
 		\begin{tikzpicture}
 		\begin{axis}[
+			width=0.8\textwidth,
+			height=0.3\textheight,
 			axis x line=bottom,
 			axis y line=center,
 			xtick={0,1,...,8},
@@ -113,31 +115,85 @@
 	\paragraph{Preisvorhersage\\}
 	Eine einzelne Preisvorhersage läuft (nach erfolgten Training der SOFMs) wie folgt ab: Zunächst ermittelt man die Äquivalenzklasse in der sich die Tankstelle befindet. Dies ist ein triviales Ergebnis der Sortierung der Tankstellen in Gruppen. Dadurch erhält man die SOFM, die für diese Tankstelle trainiert wurde.\\
 	Im nächsten Schritt benötigen wir die letzte Woche an bekannten Bezinpreisdaten. Sind die dabei gegebenen Daten z.B. bis 11:00 Uhr verfügbar, so werden nur die Daten bis 00:00 Uhr dieses Tages betrachtet. Nachdem der letzte gegebene Wert (siebter Tag 00:00 Uhr) von allen Preisen der Datenfolge abgezogen wurde, ist unser Datensatz in einer Form wie diejenigen, die von unserer SOFM sortiert wurden (siehe Abbildung \ref{Diagramm Daten}), nur das natürlich nur die ersten sieben Tage mit Daten gegeben sind. Aus den trainierten Neuronen der SOFM wählen wir nun das jenige aus, dessen Gewichtsvektor in den ersten sieben Tagen am nächsten an unserem soeben erzeugten Datensatz liegt. Wir verwenden dazu ganz klassisch die euklidische Distanz. Unsere Preisvorhersage für den nächsten Tag ist dann der weitere Verlauf des Preises in diesem Neuron. D.h. wir wählen den Preisverlauf der am ehesten zum gegebenen passt und nehmen an, dass sich unser Preis ebenso weiter entwickeln wird wie dessen Preis. Zum Schluss muss natürlich der ursprüngliche Aabgezogene Preis vom siebten Tag 23:00 wieder hinzuaddiert werden.\\
-	Falls wir Vorhersagen mehr als nur einen Tag in die Zukunft treffen wollen, so führen wir das beschriebenen Verfahren entsprechend oft hinter einander aus. D.h. mit Hilfe der Vorhersage für den ersten Tag kann der Preis analog für den zweit Tag und daraus für den dritten Tag etc. berechnet werden. Da eine SOFM dazu neigt auch extreme Datensätze zu repräsentieren "'dämpfen"` wir mit voran schreiten dieser Kette ein wenig die Differenzen am achten Tag. Dadurch werden z.B. sich selbst immer weiter verstärkende ansteigende Preise vermieden. Der Faktor ist aber immer noch so gering, dass er den eigentlichen Verlauf nicht zu sehr verfälscht.
+	Falls wir Vorhersagen mehr als nur einen Tag in die Zukunft treffen wollen, so führen wir das beschriebenen Verfahren entsprechend oft hinter einander aus. D.h. mit Hilfe der Vorhersage für den ersten Tag kann der Preis analog für den zweit Tag und daraus für den dritten Tag etc. berechnet werden. Da eine SOFM dazu neigt auch extreme Datensätze zu repräsentieren "`dämpfen"' wir mit voran schreiten dieser Kette ein wenig die Differenzen am achten Tag. Dadurch werden z.B. sich selbst immer weiter verstärkende ansteigende Preise vermieden. Der Faktor ist aber immer noch so gering, dass er den eigentlichen Verlauf nicht zu sehr verfälscht.
 
 \subsubsection{Umsetzung der Lösung}
 	Für die beiden SOFMs gibt es eine Vielzahl an Parametern, mit denen das Verhalten beeinflusst werden kann. Wir beschränken uns hier auf die wichtigsten und begründen unsere Wahl.
 	\paragraph{SOFM für Äquivalenzklassen\\}
 	Der wichtigst Prameter war hier die \textbf{Größe des Neuronennetzes} $(dim_{rough} \times dim_{rough})$. Ja größer es wird, desto spezifischer können die Tankstellen zugeordnet werden. Allerdings müssen dann auch mehr SOFMs im zweiten Schritt trainiert werden, was zu linear steigender Zeit führt. Wir entschieden uns daher für ein $4 \times 4$ Gitter an Neuronen. Dies war ein guter Mittelweg zwischen Geschwindigkeit und Vorhersagungsgüte.\\
-	Die \textbf{Größe des Vektors}$(input\_dim_{rough})$, der eine Tankstelle repräsentiert ist ebenfalls sehr entscheidend, da die Laufzeit des Trainings direkt linear davon abhängt. Wir entschieden uns für ein Jahr an Daten, jeweils ein Preis pro Tag. Dadurch sind die Vektoren 365-dimensional und dies war für uns die Grenze, was mit unserer Hardware in vernünftiger Rechenzeit möglich war. Eine höhere Dimension, also mehr Werte, würde auch hier die Vorhersage verbessern.\\
-	Der die letzten entscheidenden Parameter ist die \textbf{Anzahl der Trainingsdaten} $(data_{rough})$ und die \textbf{Anzahl der Trainingsrunden}$(rounds_{rough})$. Beide gehen linear in die Laufzeit ein. Wir entschieden uns alle Tankstellen zum Training zu verwenden und lediglich 20 Trainingsrunden durchzuführen. Dies erscheint evtl. etwas niedrig, reicht aber auch um dieses kleine Netz bei der großen Anzahl an Trainingsdaten zu trainieren.\\
+	Die \textbf{Größe des Vektors} $(input\_dim_{rough})$, der eine Tankstelle repräsentiert ist ebenfalls sehr entscheidend, da die Laufzeit des Trainings direkt linear davon abhängt. Wir entschieden uns für ein Jahr an Daten, jeweils ein Preis pro Tag. Dadurch sind die Vektoren 365-dimensional und dies war für uns die Grenze, was mit unserer Hardware in vernünftiger Rechenzeit möglich war. Eine höhere Dimension, also mehr Werte, würde auch hier die Vorhersage verbessern.\\
+	Der die letzten entscheidenden Parameter ist die \textbf{Anzahl der Trainingsdaten} $(data_{rough})$ und die \textbf{Anzahl der Trainingsrunden} $(rounds_{rough})$. Beide gehen linear in die Laufzeit ein. Wir entschieden uns alle Tankstellen zum Training zu verwenden und lediglich 20 Trainingsrunden durchzuführen. Dies erscheint evtl. etwas niedrig, reicht aber auch um dieses kleine Netz bei der großen Anzahl an Trainingsdaten zu trainieren.\\
 	Die SOFM wird mit Daten zufällig ausgewählter Tankstellen initialisiert. Die Lernparameter für das Training sind von untergeordneter Rolle. Sie wurden so gewählt, dass die Tankstellen möglichst gleichmäßig in Klassen eingeteilt werden.\\
 	Die Gesamtlaufzeit $Train_{rough}$ lässt sich wie folgt abschätzen:
 	\[ Train_{rough} \in \Theta \left( rounds_{rough} \cdot data_{rough} \cdot \left( {dim_{rough}}^2 \cdot input\_dim_{rough} \right) \right) \]
 	
 	\paragraph{SOFM für einzelnes Vorhersagemodell\\}
 	Die wichtigsten Parameter sind hier die gleichen wie bei der SOFM zur Bildung von Äquivalenzklassen:\\
-	
+	Die \textbf{Größe des Netzes} $(dim_{fine}) \times (dim_{fine})$ ist hier besonders entscheidend für Laufzeit und Vorhersagequalität. Wir entschieden uns für eine Dimension von $10 \times 10$ Dies ist zwar recht klein, aber da insgesamt 16 solche SOFMs trainiert werden müssen, stieg die Laufzeit sonst zu sehr an, und 100 Verschiedene Neuronen reichen aus, um die Preise grob abzubilden.\\
+	Die \textbf{Dimension eines Vektors} $(input\_dim_{fine})$ für die Benzinpreise von acht Tagen  ist  $8 \cdot 24 = 192$. Diese Zahl ist recht fest. Wesentliche Veränderungen nach oben oder unten würden nicht mehr zu unserer Algorithmenidee passen.\\
+	Die \textbf{Anzahl der Trainingsdaten} $(data_{fine})$ kann in der entsprechenden Methode frei gewählt werden. Wir trainierten mit 500 Datensätzen. Viel mehr Daten ergeben bei der gewählten Dimension des Netzes auch keinen Sinn.\\
+	Die \textbf{Anzahl der Trainingsrunden} ist auf 100 fest gelegt. Dies ist für eine SOFM relativ niedrig. Jedoch wurde so die Laufzeit gering genug, damit wir die restlichen Parameter ausreichend variieren konnten, bis wir ein gutes Ergebnis erhalten haben.\\
+	Die Gesamtlaufzeit $Train_{fine}$, um \textbf{alle} SOFMs zu trainieren lässt sich wie folgt abschätzen:
+		\[ Train_{fine} \in \Theta \left(\left({dim_{rough}}^2\right)\cdot rounds_{fine} \cdot data_{fine} \cdot \left( {dim_{fine}}^2 \cdot input\_dim_{fine} \right) \right) \]
 	
 	
 \subsubsection{Bewertung der Lösung}
-	Hier könnte Ihr Diagramm stehen. \\
-	Wie gut ist das was wir da gebastelt haben?\\
-	Laufzeit  betrachten: Parallelität, Coreanzahl, Server? (mit GPU) --> Forecast dann schnell\\
-	8GB RAM
-	\begin{quote}
-		Diskutieren Sie die Güte Ihrer erzielten Prognoseergebnisse für den geforederten Vorhersagezeitraum (d.h. bis zu einem Monat in die Zukunft). Verwenden Sie dazu geeignete Maßzahlen für die Güte Ihrer Vorhersagemodelle. 
-	\end{quote}
+	\paragraph{Ressourcenverbrauch\\}
+	Wir betrachten, wie üblich, Laufzeit und Speicherverbrauch.\\
+	Die \textbf{Laufzeit} unseres Programms ist natürlich von der verwendeten Hardware abhängig (siehe auch Abschnitt "`Potential der Lösung"'). Auf einem i7-6700HQ (vier Kerne mit Hyperthreading) brauchte unser Programm ca. 1:05 min für das Training aller SOFMs. Dabei implementierten wir eine simple Form von Prallelität, um alle Kerne nutzen zu können. Das asymptotische Verhalten wurde ja bereits im vorherigen Abschnitt beschrieben. Eine einzelne Preisvorhersage bewegt sich im Bereich von Millisekunden. Diese Zeit nimmt aber asymptotisch mit der Größe von $dim_{fine}$ und $data_{fine}$ zu.\\
+	Der \textbf{Speicherverbrauch} für die SOFMs ist in unserem Fall vernachlässigbar gering, da wir zu Beginn alle historischen Benzinpreise einlesen. Dies geschieht, weil nach einmaligem Einlesen, dann alle Berechnungen ohne langsame Plattenzugriffe erfolgen können. Dieses Vorgehen könnte natürlich zu einem Problem führen, wenn nicht die ca. 8GB RAM zur Verfügung stehen und die Daten wieder auf der Festplatte ausgelagert werden. Erst bei sehr großen SOFMs würde ihr Speicherplatz hier nennenswert ins Gewicht fallen, jedoch wären dann die Trainingszeit auch entsprechend sehr lang.\\
+	Unser Programm lässt sich also mit den Ressourcen ein aktuellen PCs problemlos in relativ kurzer Zeit ausführen. Insbesondere können nach dem Training (was einige Zeit benötigt) die Vorhersageanfragen in sehr kurzer Zeit bearbeitet werden.
+	
+	\paragraph{Güte der Vorhersage\\}
+	
+
+%\begin{comment}	
+
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}
+		\begin{axis}[
+		width=0.9\textwidth,
+		height=0.3\textheight,
+		axis x line=bottom,
+		axis y line=center,
+		xtick={1,5,10,...,30},
+		ytick={20,40,...,80},
+		xlabel={Zeit in Tagen},
+		ylabel={Abweichung in zehntel-ct },
+		xlabel style={below },
+		ylabel style={above },
+		xmin=0,
+		xmax=32,
+		ymin=10,
+		ymax=90,
+		legend pos=north west]
+
+			\addplot table[x =a, y = c700, col sep=comma] {data2.csv};
+			\addlegendentry{Training bis 31.05.2016}
+			\addplot table[x =a, y = b800, col sep=comma] {data2.csv};
+			\addlegendentry{Training bis 08.09.2016}
+									
+		\end{axis}
+		\end{tikzpicture}
+		\caption{Medianabweichung der Vorhersage von tatsächlichem Wert}
+		\label{Median}
+	\end{figure}
+%\end{comment}
+
+	Unsere algorithmische Umsetzung bietet für die kürze der Rechenzeit ($<$1:30 min) für das Training eine recht gute Vorhersage. Dies lässt sich leicht am Diagramm in Abbildung \ref{Median} sehen. Beide Plots wurden unabhängig von einander erstellt. Das Modell wurde jeweils bis zum 700 bzw. 800 Tag in unserer internen Zeitrechnung trainiert. (Diese Werte haben wir ohne tiefere Bedeutung ausgewählt. Sie entsprechen 31.05.2016 und 08.09.2016) Die Kurven zeigen die Abweichung unserer Vorhersage für die ersten 30 Tage im Vergleich zu den Preisen, die an den Tagen tatsächlich eingetreten sind. Für jeden Datenpunkt wurde für 5000 Tankstellen eine Vorhersage getroffen und mit dem gegebenen, historischen Preis verglichen. Der Medianwert dieser 5000 Differenzen ist dargestellt, d.h. die Vorhersage der Hälfte der Tankstellen war besser als die dargestellte Abweichung. Dies ist ein sinnvollerer Parameter als der Durchschnitt, der sehr anfällig für Ausreißer ist. Die Vorhersagen wurden jeweils für zufällige Uhrzeiten getroffen.\\
+	Die Kurven steigen leicht an, da die Vorhersage immer schwieriger wird, je weiter der Preis in der Zukunft liegt. Trotzdem verlaufen die Kurven recht ähnlich, d.h. die Preisabweichung wird wahrscheinlich immer ähnlich verlaufen wie in den beiden Beispielen hier. Man sieht recht deutlich, dass bis zur Hälfte des Monats unsere Vorhersage meist bis auf 5ct genau liegt. Auch danach liegen die meisten Vorhersagen immer noch näher als 8ct am tatsächlichen Preis.\\
+	Diese Ergebnisse sind für die geringe Größe der SOFMs und die wenigen Trainingszyklen (beides, damit die Rechenzeit gering bleibt) sehr zufriedenstellend. 
+
+	
+	\paragraph{Potential der Lösung\\}
+	Unsere Lösung bietet einige Vorteile, die sie sehr gut für den praktischen Einsatz eignet. Die Lösung ist dabei vor allem für den Einsatz mit einer Client-Server-Architektur zugeschnitten:
+	Laufzeitverbesserungen lassen sich zunächst durch \textbf{massive Parallelität} erreichen. SOFMs können hervorragend parallel, vor allem auf GPUs, berechnet werden. Durch diesen Geschwindigkeitsgewinn können die SOFMs natürlich größer werden und bessere Vorhersagen liefern.\\
+	Ein weiterer riesiger Vorteil ist, dass die SOFMs mit der Zeit "nachtrainiert" werden können, und man so Zeit sparen kann: So könnte man die SOFMs einmal zeitaufwendig trainieren und danach z.B. einmal täglich die SOFMs anpassen, d.h. man verwendet aktuelle Benzindaten, um die SOFM weiter zu trainieren. Dabei startet man mit den bereits gelernten Gewichten. Die Adaption der Neuronen an die aktuellen Daten geschieht nun wesentlich schneller, da die Neuronen schon ziemlich genau da platziert sind, wo sie auch nach dem Training sein werden. D.h. über die Zeit müssen sich die SOFMs nur einmal täglich ganz leicht (und dementsprechend schnell) adaptieren, um immer mit aktuellen Daten trainiert zu sein.\\
+	Diese Eigenschaften ergeben folgendes Szenario als optimalen Aufbau für unseren Algorithmus: Ein zentraler Server muss zunächst aufwendig trainiert werden. Dazu ist dieser mit mehreren leistungsstarken GPUs ausgestattet. Von da an muss der Server nur noch einmal täglich die SOFMs nachtrainieren, wobei deutlich weniger Ressourcen verbraucht werden. Die Nutzer können dann über eine Schnittstelle (z.B. Handyapp, Website) Anfragen für Routen/Benzinpreise stellen, welche der Server beantwortet. Falls die Anfragen zu viele werde ist es auch möglich mehrere Server die Anfragen bearbeiten zu lassen, während der Kernserver die SOFMs verwaltet und einmal täglich die aktuellen SOFMs an die anderen Server verteilt. Durch die Ausnutzung beider Effekte können die SOFMs natürlich wesentlich größer werden und länger und mit mehr Daten trainiert werden. Die Vorhersageergebnisse würden spürbar davon profitieren.
+	
+	
+	
 \subsection{Lösung des Routenproblems}
 \subsubsection{Ansatz der Lösung}
 	Für die Lösung des Routenproblems wurde der in der Aufgabenstellung beschriebene Algorithmus \glqq To fill or not to fill"' benutzt. Der Ansatz allein bedarf deswegen keiner weiteren Erläuterung, wobei unsere Umsetzung hingegen erklärenswert ist.\\
