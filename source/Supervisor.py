@@ -19,7 +19,7 @@ class Supervisor:
 		route = Route()
 		route.read(file)
 		model = Model()
-		model.train(self.gasStation, route.route[0][0][0]-1, 500)
+		model.train(self.gasStation, route.route[0][0][0]-2, 500)
 
 		print("Starting to calculate prize for each station on route")
 		prizeList = []
