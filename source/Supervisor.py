@@ -67,8 +67,8 @@ class Supervisor:
 					pass
 				else:
 					listList = line.split(";")
-					command = listList[0]
-					path = listList[1]
+					command = listList[0].strip()
+					path = listList[1].strip()
 
 					if command == "route" or command == "Route":
 						if os.path.isfile(path):
