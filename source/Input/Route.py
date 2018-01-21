@@ -90,5 +90,5 @@ class Route:
 		with open(file[:-4] + "_mit_Tankstrategie.csv", "w") as f:
 			counter = 0
 			for line in readlines:
-				f.write(line.strip() + ";" + str(self.route[counter][2]) + ";" + str(self.route[counter][3])+"\n")
+				f.write(line.strip() + ";" + str(int(self.route[counter][2])) + ";" + str(self.route[counter][3])+"\n")
 				counter += 1

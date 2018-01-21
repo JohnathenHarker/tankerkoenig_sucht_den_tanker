@@ -63,7 +63,7 @@ class Supervisor:
 	def handleHandle(self):		
 		with open("config", encoding='utf-8') as file:
 			for line in file:
-				if line.__contains__("#"):
+				if line.__contains__("#") or line.strip() == "":
 					pass
 				else:
 					listList = line.split(";")
