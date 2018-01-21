@@ -30,7 +30,7 @@ class Route:
 				else:
 					linelist = line.split(";")
 					#(date, id, prize, amount)
-					routelist.append((parseDate(linelist[0]),int(linelist[1]),0,0))
+					routelist.append((parseDate(linelist[0].strip()),int(linelist[1].strip()),0,0))
 
 		self.route = routelist[:]
 		return (self.capacity, self.route)
