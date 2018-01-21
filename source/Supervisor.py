@@ -72,13 +72,13 @@ class Supervisor:
 
 					if command == "route" or command == "Route":
 						if os.path.isfile(path):
-							self.handleRoute(listList[1])
+							self.handleRoute(path)
 						else:
 							print("Invalid path", path)
 					elif command == "forecast" or command == "Forecast":
 
 						if os.path.isfile(path):
-							self.handlePrizingForecast(listList[1])
+							self.handlePrizingForecast(path)
 						else:
 							print("Invalid path", path)
 					else:

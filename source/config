@@ -2,5 +2,13 @@
 #write your commands as the following
 #type of handle can be forecast or route
 #file has to be the relative path to the file which should be valid
-route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Bertha Benz Memorial Route.csv
-forecast;../geg. Dateien/Eingabedaten/Forecast/forecast.csv
+route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route1.csv
+route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route2.csv
+route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route3.csv
+route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route4.csv
+route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route5.csv
+route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route6.csv
+route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route7.csv
+route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route8.csv
+route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route9.csv
+route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route10.csv
