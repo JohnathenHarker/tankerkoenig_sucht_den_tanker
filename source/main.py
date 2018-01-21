@@ -25,6 +25,8 @@ def main():
     print("Finished naiveCalculate")
     print(route.route)
     """
+	
+    print("InformatiCup 2017/18 - author: T.Hinnerichs, T. John")
     S = Supervisor()
     S.handleHandle()
 

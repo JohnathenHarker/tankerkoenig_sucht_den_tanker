@@ -1,0 +1,26 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[scale=0.75,a4paper]{geometry}
+\usepackage[german]{babel}
+\usepackage{hyperref}
+
+\title{InformatiCup - Bedienungs- und Installationsanleitung}
+\author{Tilman Hinnerichs, Tobias John}
+
+\begin{document}
+	
+	\maketitle
+	
+	\section{Installation}
+	Wir haben das Programm nur auf Linux-System verwendet. Das Programm ist in Python geschrieben. Zur Ausführung wird Python 3.x benötigt. Wir verwendeten 3.5, die Ausführung sollte aber auch mit andern Versionen wie 3.4 funktionieren. Zusätzlich werden die Bibliotheken \textit{numpy} (Installation siehe \url{https://scipy.org/install.html}) und \textit{neupy} (\url{http://neupy.com/pages/installation.html}) benötigt.\\
+	Bei der Auslieferung haben wir die historischen Benzinpreise nicht mit hinzugefügt, um Speicherplatz zu sparen. Die Dateien müssen in den Ordner /geg. Dateien/Eingabedaten/Benzinpreise hinzugefügt werden.\\
+	Danach kann das Programm ausgeführt werden.
+	
+	\section{Bedienung}
+	Das Programm verfügt über keine GUI. Die Bedienung erfolgt über die Datei \textit{config} im Verzeichnis wie \textit{Supervisor.py}. Jede Zeile in der Datei entspricht der Bearbeitung einer Datei, entweder einer Preisvorhersage oder einer Routenstrategie. Jede Zeile ist gleich aufgebaut: Die Schlüsselworte \textit{forecast} bzw. \textit{route} geben zunächst an, um was für eine Datei es sich handelt. Danach folgt ein Semikolon als Trenner. Anschließend folgt der Pfad der Datei, die verarbeitet werden soll (siehe Beispiel in der mitgelieferten \textit{config}). Mehrere Zeilen werden nacheinander verarbeitet und der angegebene Auftrag wird ausgeführt. Die Ausgabedateien werden an den gleichen Platz gespeichert, von dem die angegebenen Dateien stammen.
+	
+	
+
+	
+\end{document}

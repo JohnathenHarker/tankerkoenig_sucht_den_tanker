@@ -17,7 +17,6 @@ class GasStation:
 		self.prizingTable = []
 		t1 = time.clock()
 		# read table of gas stations
-		#with open('../geg. Dateien/Eingabedaten/Tankstellen_short.csv', encoding='utf-8') as csvfile:
 		with open('../geg. Dateien/Eingabedaten/Tankstellen.csv', encoding='utf-8') as csvfile:
 			readCSV = csv.reader(csvfile, delimiter=';')
 			id = 1
@@ -31,8 +30,8 @@ class GasStation:
 
 				self.prizingTable.append((id, marke, nord, sued, self.read(self.last_day, id)))
 				id = id+1
-		# read historic data
-
+	
+		# gas stations without historic data get some random data
 		self.fillMissingData()
 
 		t2 = time.clock()
@@ -44,22 +43,19 @@ class GasStation:
 		return self.findID(ID)[4] == []
 
 	def findID(self, ID):
-		""" TO DO:
-		- find ID --> return position (and historic prizing data?)
-		"""
+		#returns data for given ID
 		if ID == self.prizingTable[ID-1][0]:
 			return self.prizingTable[ID-1]
 		else:
 			return self.prizingTable[self.prizingTable.index(ID)]
 
 	def setID(self, ID, data):
+		# sets data for gas-station-id
 		if ID == self.prizingTable[ID-1][0]:
 			self.prizingTable[ID-1] = data[:]
 
 	def read(self, endDay, ID):
-
 		# read historic data for given gas station till given day
-
 		data = []
 		oneDay = []
 		d = 0
@@ -99,9 +95,6 @@ class GasStation:
 		return data
 
 
-
-
-
 	def print(self):
 		# prints all gas stations with positions
 		for station in self.prizingTable:
@@ -110,8 +103,7 @@ class GasStation:
 
 
 	def randomData(self, ID, date):
-		# returns random data sample of 8 days
-
+		# returns random data sample of 8 days of gas station with given id
 		if self.findID(ID)[4] == []:
 			print ("ERROR: no data found for gas station", ID)
 		else:
@@ -133,6 +125,7 @@ class GasStation:
 				station = self.nextID(ID)
 				while self.findID(station)[4] == []:
 					station = self.nextID(station)
+				# gas stations gets data of next gas station with data
 				self.setID(ID, (self.findID(ID)[0], self.findID(ID)[1], self.findID(ID)[2], self.findID(ID)[3],  self.findID(station)[4][:]))
 				self.count = self.count + 1
 
@@ -140,6 +133,7 @@ class GasStation:
 
 
 	def nextID(self, ID):
+		# returns the next id 
 		return ID % len(self.prizingTable) +1
 
 	def getDailyData(self, ID, date):
@@ -150,10 +144,10 @@ class GasStation:
 			day = max([date-364, 0])
 			data = []
 			while day <= date:
-				#print(day, date, len(self.findID(ID)[4]))
 				data.append(self.findID(ID)[4][day][0])
 				day = day +1
 			return data
 
 	def getCount(self):
+		# returns number of gas stations
 		return self.count
