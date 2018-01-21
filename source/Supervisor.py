@@ -50,7 +50,7 @@ class Supervisor:
 		for element in prizingForecast.forecastParameter:
 			((lastKnownDate,lastKnownHour),(forecastDate, forecastHour)), ID, prize = element
 			model.train(self.gasStation, lastKnownDate, 500)
-			prizeList.append(model.forecast(ID, forecastDate, forecastHour, self.gasStation))
+			prizeList.append(int(model.forecast(ID, forecastDate, forecastHour, self.gasStation)))
 		print("Finished forecasts")
 
 		prizingForecast.appendPrize(prizeList)
