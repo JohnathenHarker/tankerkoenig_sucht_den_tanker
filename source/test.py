@@ -8,9 +8,9 @@ def main():
 
     # M = Model()
     # M.train([])
-
     gasStation = GasStation()
     route = Route()
+    """
     route.read("../geg. Dateien/Eingabedaten/Fahrzeugrouten/Bertha Benz Memorial Route.csv")
     strategy = Strategy(gasStation)
     L = [1] * 31
@@ -26,22 +26,26 @@ def main():
     print(strategy.naiveCalculate(route))
     print("Finished naiveCalculate")
     print(route.route)
-
+    """
     strategy = Strategy(gasStation)
 
-    print("Starting to find gasStations next to 1")
-    activeID = 1
-    nearToActiveID = []
-    for station in range(1, 15000):
-        route.capacity = 1
-        route.route = [(100, activeID, 0, 0), (101, station, 0, 0)]
-        strategy.route = route.route
-        distance = strategy.consumption(0, 1) / 5.6 * 100
-        if distance < 100:
-            nearToActiveID.append(station)
+    for i in range(1,15000, 100):
 
-    print("activeID", activeID, "nearToActiveID", nearToActiveID)
+        activeID = i
+        print("Starting to find gasStations next to", activeID)
+        nearToActiveID = []
+        for station in range(1, 15000):
+            route.capacity = 1
+            route.route = [(100, activeID, 0, 0), (101, station, 0, 0)]
+            strategy.route = route.route
+            distance = strategy.consumption(0, 1) / 5.6 * 100
+            if distance < 100:
+                nearToActiveID.append(station)
 
+        print("activeID", activeID, "nearToActiveID", nearToActiveID)
+
+        with open("nearFile", mode="a") as file:
+            file.write("activeID: " + str(activeID) +  "nearToActiveID" + str(nearToActiveID))
     #S = Supervisor()
     #S.handleHandle()
 
