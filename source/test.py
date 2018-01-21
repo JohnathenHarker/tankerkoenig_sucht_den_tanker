@@ -28,7 +28,7 @@ def main():
     """
     strategy = Strategy(gasStation)
     prizeList = []
-    for i in range(1,10):
+    for i in range(1,11):
         route = Route()
         file = "../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route"+str(i)+"_mit_Tankstrategie.csv"
         route.read(file)
@@ -44,6 +44,7 @@ def main():
                     innerPrizeList.append(int(linelist[2]))
         route.appendPrize(innerPrizeList)
         prizeList.append((i,strategy.calculate(route),strategy.naiveCalculate(route)))
+        print("prizeList", prizeList)
     print(prizeList)
 
     with open("VergleichX", "w") as f:
