@@ -40,6 +40,14 @@ def parseDate(date):
 		normalized_day = normalized_day +30
 
 	normalized_day = normalized_day + day
+	
+	while (hour<0):
+		hour = hour + 24
+		normalized_day = normalized_day -1
+		
+	while (hour > 23):
+		hour = hour - 24
+		normalized_day = normalized_day +1
 
 	# last three values probably not needed
 	return (normalized_day, hour)#, year, month, day)
