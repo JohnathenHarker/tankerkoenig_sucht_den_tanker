@@ -9,7 +9,6 @@ def main():
     # M = Model()
     # M.train([])
     gasStation = GasStation()
-    route = Route()
     """
     route.read("../geg. Dateien/Eingabedaten/Fahrzeugrouten/Bertha Benz Memorial Route.csv")
     strategy = Strategy(gasStation)
@@ -28,7 +27,31 @@ def main():
     print(route.route)
     """
     strategy = Strategy(gasStation)
+    prizeList = []
+    for i in range(1,10):
+        route = Route()
+        file = "../geg. Dateien/Eingabedaten/Fahrzeugrouten/Route"+str(i)+"_mit_Tankstrategie.csv"
+        route.read(file)
+        innerPrizeList = []
+        with open(file, encoding='utf-8') as routefile:
+            first_line = True
+            for line in routefile:
+                if first_line:
+                    first_line = False
+                else:
+                    linelist = line.split(";")
+                    # (date, id, prize, amount)
+                    innerPrizeList.append(int(linelist[2]))
+        route.appendPrize(innerPrizeList)
+        prizeList.append((i,strategy.calculate(route),strategy.naiveCalculate(route)))
+    print(prizeList)
 
+    with open("VergleichX", "w") as f:
+        f.write(prizeList)
+
+
+
+    """
     for i in range(1,15000, 100):
 
         activeID = i
@@ -48,7 +71,7 @@ def main():
             file.write("activeID: " + str(activeID) +  "nearToActiveID" + str(nearToActiveID))
     #S = Supervisor()
     #S.handleHandle()
-
+    """
     t2 = time.time()
     print("executed in", t2 - t1, "seconds")
 
