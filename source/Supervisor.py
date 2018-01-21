@@ -13,8 +13,7 @@ class Supervisor:
 
 	def __init__(self):
 
-		#self.gasStation = GasStation()
-		w=0
+		self.gasStation = GasStation()
 
 	def handleRoute(self, file):
 		route = Route()
