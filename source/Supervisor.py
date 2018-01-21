@@ -13,7 +13,8 @@ class Supervisor:
 
 	def __init__(self):
 
-		self.gasStation = GasStation()
+		#self.gasStation = GasStation()
+		w=0
 
 	def handleRoute(self, file):
 		route = Route()
@@ -50,7 +51,7 @@ class Supervisor:
 		for element in prizingForecast.forecastParameter:
 			((lastKnownDate,lastKnownHour),(forecastDate, forecastHour)), ID, prize = element
 			model.train(self.gasStation, lastKnownDate, 500)
-			prizeList.append(model.forecast(ID, forecastDate, forecastHour, self.gasStation))
+			prizeList.append(int(model.forecast(ID, forecastDate, forecastHour, self.gasStation)))
 		print("Finished forecasts")
 
 		prizingForecast.appendPrize(prizeList)

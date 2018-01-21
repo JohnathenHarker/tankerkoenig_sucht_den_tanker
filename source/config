@@ -3,3 +3,4 @@
 #type of handle can be forecast or route
 #file has to be the relative path to the file which should be valid
 route;../geg. Dateien/Eingabedaten/Fahrzeugrouten/Bertha Benz Memorial Route.csv
+forecast;../geg. Dateien/Eingabedaten/Forecast/forecast.csv
