@@ -6,6 +6,7 @@
 \usepackage{verbatim}
 \usepackage{hyperref}
 \usepackage{pgfplots} % LaTeX
+\usepackage{graphicx}
 
 
 %opening
@@ -191,7 +192,7 @@
 	\label{potential}
 	Unsere Lösung bietet einige Vorteile, die sie sehr gut für den praktischen Einsatz eignet. Die Lösung ist dabei vor allem für den Einsatz mit einer Client-Server-Architektur zugeschnitten:
 	Laufzeitverbesserungen lassen sich zunächst durch \textbf{massive Parallelität} erreichen. SOFMs können hervorragend parallel, vor allem auf GPUs, berechnet werden. Durch diesen Geschwindigkeitsgewinn können die SOFMs natürlich größer werden und bessere Vorhersagen liefern.\\
-	Ein weiterer riesiger Vorteil ist, dass die SOFMs mit der Zeit "nachtrainiert" werden können, und man so Zeit sparen kann: So könnte man die SOFMs einmal zeitaufwendig trainieren und danach z.B. einmal täglich die SOFMs anpassen, d.h. man verwendet aktuelle Benzindaten, um die SOFM weiter zu trainieren. Dabei startet man mit den bereits gelernten Gewichten. Die Adaption der Neuronen an die aktuellen Daten geschieht nun wesentlich schneller, da die Neuronen schon ziemlich genau da platziert sind, wo sie auch nach dem Training sein werden. D.h. über die Zeit müssen sich die SOFMs nur einmal täglich ganz leicht (und dementsprechend schnell) adaptieren, um immer mit aktuellen Daten trainiert zu sein.\\
+	Ein weiterer riesiger Vorteil ist, dass die SOFMs mit der Zeit \glqq nachtrainiert\glqq{} werden können, und man so Zeit sparen kann: So könnte man die SOFMs einmal zeitaufwendig trainieren und danach z.B. einmal täglich die SOFMs anpassen, d.h. man verwendet aktuelle Benzindaten, um die SOFM weiter zu trainieren. Dabei startet man mit den bereits gelernten Gewichten. Die Adaption der Neuronen an die aktuellen Daten geschieht nun wesentlich schneller, da die Neuronen schon ziemlich genau da platziert sind, wo sie auch nach dem Training sein werden. D.h. über die Zeit müssen sich die SOFMs nur einmal täglich ganz leicht (und dementsprechend schnell) adaptieren, um immer mit aktuellen Daten trainiert zu sein.\\
 	Diese Eigenschaften ergeben folgendes Szenario als optimalen Aufbau für unseren Algorithmus: Ein zentraler Server muss zunächst aufwendig trainiert werden. Dazu ist dieser mit mehreren leistungsstarken GPUs ausgestattet. Von da an muss der Server nur noch einmal täglich die SOFMs nachtrainieren, wobei deutlich weniger Ressourcen verbraucht werden. Die Nutzer können dann über eine Schnittstelle (z.B. Handyapp, Website) Anfragen für Routen/Benzinpreise stellen, welche der Server beantwortet. Falls die Anfragen zu viele werde ist es auch möglich mehrere Server die Anfragen bearbeiten zu lassen, während der Kernserver die SOFMs verwaltet und einmal täglich die aktuellen SOFMs an die anderen Server verteilt. Durch die Ausnutzung beider Effekte können die SOFMs natürlich wesentlich größer werden und länger und mit mehr Daten trainiert werden. Die Vorhersageergebnisse würden spürbar davon profitieren.
 	
 	
@@ -217,8 +218,15 @@
 	\end{enumerate}
 	Wobei die beschreibenden Formeln in der Beschreibung des Algorithmus zu finden sind.
 \section{Implementierung und Umsetzung der Lösung}
-	Hier könnte Ihr Klassendiagramm stehen.	
-	Entwurf und Struktur der Lösung
+	%Hier könnte Ihr Klassendiagramm stehen.	
+	%Entwurf und Struktur der Lösung
+	
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[width=\textwidth]{Model.png}
+		\caption{Entwurfsklassendiagramm}
+		\label{design}
+	\end{figure}
 \subsection{Input-einlesende Klassen}
 	Die folgenden Beschreibungen der Klassen beziehen sich auf die Gruppe der Input-einlesenden Klassen. Sie sorgen für das korrekte der Einlesen der drei verschiedenen Inputfiles.
 \subsubsection{Klasse GasStation}
